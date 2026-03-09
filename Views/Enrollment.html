@@ -1,1212 +1,569 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Dashboard — DBTC Portal</title>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --indigo: #4f46e5;
-            --indigo-dark: #3730a3;
-            --violet: #7c3aed;
-            --indigo-light: #818cf8;
-            --indigo-pale: rgba(79,70,229,0.12);
-            --surface: #ffffff;
-            --surface-2: #f8fafc;
-            --surface-3: #f1f5f9;
-            --border: #e2e8f0;
-            --text-primary: #0f172a;
-            --text-secondary: #475569;
-            --text-muted: #94a3b8;
-            --green: #059669;
-            --green-light: #d1fae5;
-            --amber: #d97706;
-            --amber-light: #fef3c7;
-            --red: #dc2626;
-            --red-light: #fee2e2;
-            --blue: #2563eb;
-            --blue-light: #dbeafe;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'DM Sans', sans-serif;
-            background: var(--surface-2);
-            color: var(--text-primary);
-            min-height: 100vh;
-            display: flex;
-        }
-
-        /* ── SIDEBAR ── */
-        .sidebar {
-            width: 260px;
-            background: #0f0e1a;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            flex-shrink: 0;
-            position: sticky;
-            top: 0;
-            height: 100vh;
-            overflow-y: auto;
-        }
-
-        .sidebar-brand {
-            padding: 28px 24px 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
-        }
-        .brand-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .brand-icon {
-            width: 40px; height: 40px;
-            background: linear-gradient(135deg, var(--indigo), var(--violet));
-            border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            font-family: 'DM Serif Display', serif;
-            font-size: 16px;
-            color: white;
-            font-weight: 700;
-            flex-shrink: 0;
-        }
-        .brand-text .name {
-            font-weight: 700;
-            color: white;
-            font-size: 15px;
-        }
-        .brand-text .sub {
-            color: rgba(255,255,255,0.35);
-            font-size: 11px;
-        }
-
-        .sidebar-nav {
-            padding: 20px 14px;
-            flex: 1;
-        }
-        .nav-label {
-            font-size: 10px;
-            font-weight: 600;
-            letter-spacing: 1.2px;
-            color: rgba(255,255,255,0.25);
-            text-transform: uppercase;
-            padding: 0 10px;
-            margin: 18px 0 8px;
-        }
-        .nav-label:first-child { margin-top: 0; }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 12px;
-            border-radius: 10px;
-            cursor: pointer;
-            color: rgba(255,255,255,0.45);
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.2s;
-            margin-bottom: 2px;
-            text-decoration: none;
-        }
-        .nav-item:hover {
-            background: rgba(255,255,255,0.06);
-            color: rgba(255,255,255,0.8);
-        }
-        .nav-item.active {
-            background: linear-gradient(135deg, rgba(79,70,229,0.3), rgba(124,58,237,0.2));
-            color: white;
-            border: 1px solid rgba(99,102,241,0.3);
-        }
-        .nav-item.active .nav-icon { opacity: 1; }
-        .nav-icon { font-size: 16px; width: 20px; text-align: center; opacity: 0.6; }
-
-        .nav-badge {
-            margin-left: auto;
-            background: var(--indigo);
-            color: white;
-            font-size: 11px;
-            font-weight: 600;
-            padding: 2px 7px;
-            border-radius: 100px;
-        }
-
-        .sidebar-footer {
-            padding: 16px 14px;
-            border-top: 1px solid rgba(255,255,255,0.06);
-        }
-        .student-card {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 12px;
-            border-radius: 10px;
-            background: rgba(255,255,255,0.05);
-        }
-        .avatar {
-            width: 36px; height: 36px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--indigo), var(--violet));
-            display: flex; align-items: center; justify-content: center;
-            color: white;
-            font-weight: 700;
-            font-size: 13px;
-            flex-shrink: 0;
-        }
-        .student-info .sname {
-            color: white;
-            font-size: 13px;
-            font-weight: 600;
-        }
-        .student-info .sid {
-            color: rgba(255,255,255,0.35);
-            font-size: 11px;
-        }
-        .logout-btn {
-            margin-left: auto;
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: rgba(255,255,255,0.3);
-            font-size: 16px;
-            padding: 4px;
-            transition: color 0.2s;
-        }
-        .logout-btn:hover { color: #fca5a5; }
-
-        /* ── MAIN ── */
-        .main {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            min-width: 0;
-        }
-
-        /* Topbar */
-        .topbar {
-            background: white;
-            border-bottom: 1px solid var(--border);
-            padding: 18px 32px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 20px;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-        .topbar-left h1 {
-            font-family: 'DM Serif Display', serif;
-            font-size: 22px;
-            color: var(--text-primary);
-        }
-        .topbar-left p {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-top: 2px;
-        }
-        .topbar-right { display: flex; align-items: center; gap: 12px; }
-
-        .notif-btn {
-            position: relative;
-            width: 38px; height: 38px;
-            border-radius: 10px;
-            background: var(--surface-3);
-            border: 1px solid var(--border);
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
-            font-size: 16px;
-            transition: all 0.2s;
-        }
-        .notif-btn:hover { background: var(--surface); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-        .notif-dot {
-            position: absolute;
-            top: 6px; right: 6px;
-            width: 8px; height: 8px;
-            background: var(--red);
-            border-radius: 50%;
-            border: 2px solid white;
-        }
-
-        .semester-badge {
-            background: var(--indigo-pale);
-            color: var(--indigo);
-            border: 1px solid rgba(79,70,229,0.2);
-            padding: 6px 14px;
-            border-radius: 100px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        /* Page content */
-        .page-content {
-            padding: 32px;
-            flex: 1;
-        }
-
-        /* ── STAT CARDS ── */
-        .stats-row {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 18px;
-            margin-bottom: 28px;
-        }
-
-        .stat-card {
-            background: white;
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 22px 22px 18px;
-            transition: all 0.25s;
-        }
-        .stat-card:hover {
-            box-shadow: 0 4px 20px rgba(0,0,0,0.07);
-            transform: translateY(-2px);
-        }
-        .stat-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 16px;
-        }
-        .stat-icon {
-            width: 42px; height: 42px;
-            border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 18px;
-        }
-        .stat-trend {
-            font-size: 12px;
-            font-weight: 600;
-            padding: 4px 8px;
-            border-radius: 6px;
-        }
-        .trend-up   { background: var(--green-light);  color: var(--green); }
-        .trend-down { background: var(--red-light);    color: var(--red); }
-        .trend-neu  { background: var(--surface-3);    color: var(--text-muted); }
-
-        .stat-value {
-            font-family: 'DM Serif Display', serif;
-            font-size: 32px;
-            color: var(--text-primary);
-            line-height: 1;
-            margin-bottom: 4px;
-        }
-        .stat-label {
-            font-size: 13px;
-            color: var(--text-muted);
-        }
-
-        /* ── TWO-COL GRID ── */
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 22px;
-            margin-bottom: 22px;
-        }
-        .grid-3-1 {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 22px;
-            margin-bottom: 22px;
-        }
-
-        /* Card base */
-        .card {
-            background: white;
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            overflow: hidden;
-        }
-        .card-header {
-            padding: 20px 24px 16px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .card-title {
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-        .card-link {
-            font-size: 13px;
-            color: var(--indigo);
-            text-decoration: none;
-            font-weight: 500;
-        }
-        .card-link:hover { text-decoration: underline; }
-        .card-body { padding: 20px 24px; }
-
-        /* ── STUDENT INFO BANNER ── */
-        .info-banner {
-            background: linear-gradient(135deg, #0f0e1a 0%, #1e1b4b 60%, #2d1b69 100%);
-            border-radius: 20px;
-            padding: 28px 32px;
-            margin-bottom: 28px;
-            display: flex;
-            align-items: center;
-            gap: 24px;
-            position: relative;
-            overflow: hidden;
-        }
-        .info-banner::before {
-            content: '';
-            position: absolute;
-            top: -40px; right: -40px;
-            width: 220px; height: 220px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(124,58,237,0.25), transparent 70%);
-        }
-        .info-banner::after {
-            content: '';
-            position: absolute;
-            bottom: -30px; left: 30%;
-            width: 160px; height: 160px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(79,70,229,0.2), transparent 70%);
-        }
-        .banner-avatar {
-            width: 72px; height: 72px;
-            border-radius: 18px;
-            background: linear-gradient(135deg, var(--indigo), var(--violet));
-            display: flex; align-items: center; justify-content: center;
-            font-family: 'DM Serif Display', serif;
-            font-size: 28px; color: white;
-            flex-shrink: 0;
-            box-shadow: 0 8px 24px rgba(79,70,229,0.4);
-            border: 3px solid rgba(255,255,255,0.15);
-            position: relative; z-index: 1;
-        }
-        .banner-info { flex: 1; position: relative; z-index: 1; }
-        .banner-name {
-            font-family: 'DM Serif Display', serif;
-            font-size: 26px;
-            color: white;
-            margin-bottom: 4px;
-        }
-        .banner-meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 16px;
-            margin-top: 10px;
-        }
-        .meta-pill {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.12);
-            padding: 5px 12px;
-            border-radius: 100px;
-            font-size: 12px;
-            color: rgba(255,255,255,0.75);
-        }
-        .banner-actions { display: flex; gap: 10px; position: relative; z-index: 1; }
-        .btn-outline-white {
-            padding: 9px 18px;
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 10px;
-            color: white;
-            font-size: 13px;
-            font-weight: 500;
-            font-family: 'DM Sans', sans-serif;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .btn-outline-white:hover { background: rgba(255,255,255,0.18); }
-        .btn-white {
-            padding: 9px 18px;
-            background: white;
-            border: none;
-            border-radius: 10px;
-            color: var(--indigo);
-            font-size: 13px;
-            font-weight: 600;
-            font-family: 'DM Sans', sans-serif;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .btn-white:hover { background: #f0f4ff; }
-
-        /* ── SCHEDULE TABLE ── */
-        .schedule-table { width: 100%; border-collapse: collapse; }
-        .schedule-table th {
-            text-align: left;
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: 0.6px;
-            text-transform: uppercase;
-            color: var(--text-muted);
-            padding: 0 0 12px;
-            border-bottom: 1px solid var(--border);
-        }
-        .schedule-table td {
-            padding: 13px 0;
-            font-size: 13px;
-            border-bottom: 1px solid var(--surface-3);
-            vertical-align: middle;
-        }
-        .schedule-table tr:last-child td { border-bottom: none; }
-
-        .subj-code {
-            font-weight: 700;
-            color: var(--text-primary);
-            font-size: 13px;
-        }
-        .subj-name {
-            color: var(--text-secondary);
-            font-size: 12px;
-            margin-top: 2px;
-        }
-
-        .day-badge {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 5px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-        .day-mwf { background: #dbeafe; color: #1d4ed8; }
-        .day-tth { background: #fce7f3; color: #be185d; }
-        .day-sat { background: #fef3c7; color: #92400e; }
-
-        .units-badge {
-            background: var(--indigo-pale);
-            color: var(--indigo);
-            padding: 3px 8px;
-            border-radius: 5px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        /* ── GRADES ── */
-        .grade-row {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 12px 0;
-            border-bottom: 1px solid var(--surface-3);
-        }
-        .grade-row:last-child { border-bottom: none; }
-        .grade-subj { flex: 1; }
-        .grade-subj .code { font-weight: 600; font-size: 13px; }
-        .grade-subj .name { font-size: 12px; color: var(--text-muted); }
-        .grade-bar-wrap {
-            width: 100px;
-            height: 6px;
-            background: var(--surface-3);
-            border-radius: 3px;
-            overflow: hidden;
-        }
-        .grade-bar {
-            height: 100%;
-            border-radius: 3px;
-            transition: width 0.6s ease;
-        }
-        .grade-value {
-            font-weight: 700;
-            font-size: 15px;
-            min-width: 38px;
-            text-align: right;
-        }
-        .grade-status {
-            font-size: 11px;
-            padding: 3px 7px;
-            border-radius: 5px;
-            font-weight: 600;
-            min-width: 44px;
-            text-align: center;
-        }
-        .gs-pass   { background: var(--green-light); color: var(--green); }
-        .gs-warn   { background: var(--amber-light); color: var(--amber); }
-        .gs-fail   { background: var(--red-light);   color: var(--red); }
-        .gs-pending{ background: var(--surface-3);   color: var(--text-muted); }
-
-        /* ── ANNOUNCEMENTS ── */
-        .ann-item {
-            display: flex;
-            gap: 14px;
-            padding: 14px 0;
-            border-bottom: 1px solid var(--surface-3);
-        }
-        .ann-item:last-child { border-bottom: none; }
-        .ann-icon {
-            width: 38px; height: 38px;
-            border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 16px;
-            flex-shrink: 0;
-        }
-        .ann-body { flex: 1; }
-        .ann-title {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 3px;
-        }
-        .ann-desc {
-            font-size: 12px;
-            color: var(--text-secondary);
-            line-height: 1.5;
-        }
-        .ann-time {
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-top: 4px;
-        }
-        .ann-urgent .ann-icon { background: var(--red-light); }
-        .ann-info   .ann-icon { background: var(--blue-light); }
-        .ann-green  .ann-icon { background: var(--green-light); }
-        .ann-amber  .ann-icon { background: var(--amber-light); }
-
-        /* ── QUICK LINKS ── */
-        .quick-links {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-        .quick-link {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 14px 16px;
-            background: var(--surface-2);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            cursor: pointer;
-            text-decoration: none;
-            transition: all 0.2s;
-        }
-        .quick-link:hover {
-            background: white;
-            border-color: var(--indigo-light);
-            box-shadow: 0 2px 12px rgba(79,70,229,0.1);
-            transform: translateY(-1px);
-        }
-        .ql-icon {
-            width: 36px; height: 36px;
-            border-radius: 9px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 16px;
-            flex-shrink: 0;
-        }
-        .ql-text .ql-name {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-        .ql-text .ql-sub {
-            font-size: 11px;
-            color: var(--text-muted);
-        }
-        .ql-arrow {
-            margin-left: auto;
-            color: var(--text-muted);
-            font-size: 14px;
-        }
-
-        /* ── GWA CARD ── */
-        .gwa-display {
-            text-align: center;
-            padding: 10px 0 20px;
-        }
-        .gwa-number {
-            font-family: 'DM Serif Display', serif;
-            font-size: 64px;
-            background: linear-gradient(135deg, var(--indigo), var(--violet));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            line-height: 1;
-            margin-bottom: 6px;
-        }
-        .gwa-label { font-size: 13px; color: var(--text-muted); }
-        .gwa-bar-wrap {
-            width: 100%;
-            height: 8px;
-            background: var(--surface-3);
-            border-radius: 4px;
-            margin: 16px 0 10px;
-            overflow: hidden;
-        }
-        .gwa-bar {
-            height: 100%;
-            width: 82%;
-            background: linear-gradient(90deg, var(--indigo), var(--violet));
-            border-radius: 4px;
-        }
-        .gwa-meta {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            color: var(--text-muted);
-        }
-        .honor-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: linear-gradient(135deg, var(--indigo-pale), rgba(124,58,237,0.1));
-            border: 1px solid rgba(79,70,229,0.2);
-            color: var(--indigo);
-            padding: 7px 14px;
-            border-radius: 100px;
-            font-size: 12px;
-            font-weight: 600;
-            margin: 14px auto 0;
-            display: block;
-            text-align: center;
-        }
-
-        /* ── RESPONSIVE ── */
-        @media (max-width: 1200px) {
-            .stats-row { grid-template-columns: repeat(2, 1fr); }
-        }
-        @media (max-width: 1024px) {
-            .grid-3-1 { grid-template-columns: 1fr; }
-            .grid-2   { grid-template-columns: 1fr; }
-        }
-        @media (max-width: 768px) {
-            .sidebar { display: none; }
-            .page-content { padding: 20px; }
-            .topbar { padding: 16px 20px; }
-            .info-banner {
-                flex-direction: column;
-                text-align: center;
-                align-items: flex-start;
-            }
-            .banner-meta { justify-content: flex-start; }
-        }
-        @media (max-width: 480px) {
-            .stats-row { grid-template-columns: 1fr; }
-        }
-
-        /* Scroll */
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-
-        /* Animations */
-        @keyframes fadeSlideIn {
-            from { opacity: 0; transform: translateY(16px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-        .stat-card, .card, .info-banner {
-            animation: fadeSlideIn 0.5s ease both;
-        }
-        .stat-card:nth-child(1) { animation-delay: 0.05s; }
-        .stat-card:nth-child(2) { animation-delay: 0.10s; }
-        .stat-card:nth-child(3) { animation-delay: 0.15s; }
-        .stat-card:nth-child(4) { animation-delay: 0.20s; }
-    </style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Enrollment — DBTC Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--i:#4f46e5;--v:#7c3aed;--il:#818cf8;--ip:rgba(79,70,229,.10);--s2:#f8fafc;--s3:#f1f5f9;--b:#e2e8f0;--tp:#0f172a;--ts:#475569;--tm:#94a3b8;--g:#059669;--gl:#d1fae5;--a:#d97706;--al:#fef3c7;--r:#dc2626;--rl:#fee2e2;--sb:#0f0e1a}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--s2);color:var(--tp);min-height:100vh;display:flex}
+/* SIDEBAR */
+.sidebar{width:72px;background:var(--sb);min-height:100vh;display:flex;flex-direction:column;align-items:center;position:sticky;top:0;height:100vh;flex-shrink:0;z-index:100;border-right:1px solid rgba(255,255,255,.05)}
+.s-logo{width:40px;height:40px;background:linear-gradient(135deg,var(--i),var(--v));border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'DM Serif Display',serif;font-size:15px;color:#fff;font-weight:700;margin:20px 0 28px;box-shadow:0 4px 16px rgba(79,70,229,.4)}
+.s-nav{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;width:100%;padding:0 10px}
+.s-div{width:32px;height:1px;background:rgba(255,255,255,.07);margin:10px 0}
+.ni{position:relative;width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,.3);font-size:18px;transition:all .2s;text-decoration:none}
+.ni:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.7)}
+.ni.active{background:linear-gradient(135deg,rgba(79,70,229,.35),rgba(124,58,237,.25));color:#fff;border:1px solid rgba(99,102,241,.35)}
+.ni::after{content:attr(data-tip);position:absolute;left:calc(100% + 12px);top:50%;transform:translateY(-50%);background:#1e1b3a;color:#fff;font-size:12px;padding:6px 10px;border-radius:7px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .2s;border:1px solid rgba(255,255,255,.1)}
+.ni:hover::after{opacity:1}
+.pip{position:absolute;top:8px;right:8px;width:7px;height:7px;background:var(--r);border-radius:50%;border:1.5px solid var(--sb)}
+.s-foot{padding:16px 0 20px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.s-av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--i),var(--v));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;border:2px solid rgba(255,255,255,.15)}
+.s-out{width:36px;height:36px;border-radius:10px;background:none;border:none;color:rgba(255,255,255,.25);font-size:16px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center}
+.s-out:hover{color:#fca5a5;background:rgba(220,38,38,.12)}
+/* MAIN */
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+/* HERO */
+.hero{background:linear-gradient(135deg,#0f0e1a 0%,#1e1b4b 55%,#2d1b69 100%);padding:32px 40px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23fff' fill-opacity='.025'%3E%3Ccircle cx='30' cy='30' r='1.5'/%3E%3C/g%3E%3C/svg%3E")}
+.orb{position:absolute;border-radius:50%;pointer-events:none}
+.o1{top:-60px;right:100px;width:260px;height:260px;background:radial-gradient(circle,rgba(124,58,237,.3),transparent 70%)}
+.o2{bottom:-40px;right:350px;width:180px;height:180px;background:radial-gradient(circle,rgba(79,70,229,.2),transparent 70%)}
+.h-in{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.h-bc{font-size:12px;color:rgba(255,255,255,.35);margin-bottom:8px}
+.h-bc a{color:rgba(255,255,255,.4);text-decoration:none}.h-bc a:hover{color:rgba(255,255,255,.7)}
+.h-title{font-family:'DM Serif Display',serif;font-size:28px;color:#fff;margin-bottom:6px}
+.h-sub{font-size:13px;color:rgba(255,255,255,.45)}
+.pills{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pill{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.75);padding:8px 16px;border-radius:100px;font-size:12px;font-weight:500;display:flex;align-items:center;gap:6px}
+.pill .dot{width:7px;height:7px;border-radius:50%;background:#6ee7b7}.pill.warn .dot{background:#fbbf24}
+/* STEPS */
+.steps{position:relative;z-index:1;display:flex;align-items:center;margin-top:28px}
+.st{display:flex;align-items:center;gap:10px;cursor:pointer;transition:opacity .2s}.st:not(.active){opacity:.45}.st:not(.active):hover{opacity:.7}
+.sn{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:rgba(255,255,255,.6);transition:all .3s}
+.st.active .sn{background:var(--il);border-color:var(--il);color:#fff;box-shadow:0 0 0 4px rgba(129,140,248,.2)}
+.st.done .sn{background:rgba(5,150,105,.3);border-color:#6ee7b7;color:#6ee7b7}
+.sl{font-size:12px;font-weight:600;color:#fff}
+.sc{flex:1;height:1px;min-width:32px;max-width:60px;background:rgba(255,255,255,.15);margin:0 10px}.sc.done{background:rgba(110,231,183,.4)}
+/* PAGE */
+.pc{padding:28px 40px 40px;flex:1;display:flex;flex-direction:column;gap:24px}
+.sp{display:none;animation:fu .4s ease both}.sp.active{display:block}
+@keyframes fu{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.sh{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:16px}
+.stl{font-size:13px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--tm);display:flex;align-items:center;gap:8px}
+.stl::before{content:'';display:inline-block;width:3px;height:14px;background:linear-gradient(180deg,var(--i),var(--v));border-radius:2px}
+/* FILTERS */
+.fb{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+.sw{position:relative;flex:1;min-width:220px}
+.sw span{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:14px;opacity:.4;pointer-events:none}
+.si{width:100%;padding:10px 14px 10px 38px;background:#fff;border:1px solid var(--b);border-radius:10px;font-size:13px;font-family:'DM Sans',sans-serif;transition:all .2s}
+.si:focus{outline:none;border-color:var(--il);box-shadow:0 0 0 3px var(--ip)}
+.fs{padding:10px 30px 10px 14px;background:#fff;border:1px solid var(--b);border-radius:10px;font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394a3b8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+/* LAYOUT */
+.el{display:grid;grid-template-columns:1fr 340px;gap:22px;align-items:start}
+.sg{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+/* SUBJECT CARD */
+.sc2{background:#fff;border:1.5px solid var(--b);border-radius:16px;padding:18px 20px;cursor:pointer;transition:all .22s;position:relative;overflow:hidden;user-select:none}
+.sc2::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--i),var(--v));opacity:0;transition:opacity .2s}
+.sc2:hover{border-color:var(--il);box-shadow:0 4px 20px rgba(79,70,229,.1);transform:translateY(-2px)}
+.sc2:hover::before,.sc2.sel::before{opacity:1}
+.sc2.sel{border-color:var(--i);background:linear-gradient(135deg,rgba(79,70,229,.04),rgba(124,58,237,.02))}
+.sc2.conf{border-color:var(--a);opacity:.6;cursor:not-allowed}.sc2.conf:hover{transform:none;box-shadow:none}
+.sc-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
+.sc-code{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--i)}
+.sc-name{font-size:14px;font-weight:700;color:var(--tp);margin-top:2px;line-height:1.3}
+.ck{width:22px;height:22px;border-radius:50%;background:var(--s3);border:1.5px solid var(--b);display:flex;align-items:center;justify-content:center;font-size:11px;transition:all .2s;flex-shrink:0}
+.sc2.sel .ck{background:var(--i);border-color:var(--i);color:#fff}
+.sc-meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.tag{font-size:11px;font-weight:600;padding:3px 8px;border-radius:5px;display:inline-flex;align-items:center;gap:4px}
+.mwf{background:#dbeafe;color:#1d4ed8}.tth{background:#fce7f3;color:#be185d}.sat{background:#fef3c7;color:#92400e}
+.tun{background:var(--ip);color:var(--i)}.tlec{background:var(--s3);color:var(--ts)}.tlab{background:#ecfdf5;color:var(--g)}.tcfl{background:var(--al);color:var(--a)}
+.sc-inst{font-size:12px;color:var(--tm)}
+.sc-slots{margin-top:10px;padding-top:10px;border-top:1px solid var(--s3);display:flex;align-items:center;justify-content:space-between}
+.sb2{flex:1;height:4px;background:var(--s3);border-radius:2px;margin:0 10px;overflow:hidden}
+.sbf{height:100%;border-radius:2px}.sok{background:linear-gradient(90deg,var(--g),#34d399)}.swn{background:linear-gradient(90deg,var(--a),#fbbf24)}.sfl{background:var(--r)}
+/* CART */
+.cp{background:#fff;border:1px solid var(--b);border-radius:18px;overflow:hidden;position:sticky;top:20px}
+.ch{background:linear-gradient(135deg,#0f0e1a,#1e1b4b);padding:20px 22px}
+.ch-t{font-family:'DM Serif Display',serif;font-size:18px;color:#fff;margin-bottom:4px}
+.ch-s{font-size:12px;color:rgba(255,255,255,.45)}
+.cu-row{display:flex;gap:10px;margin-top:14px}
+.cu{flex:1;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 12px}
+.cu-v{font-family:'DM Serif Display',serif;font-size:22px;color:#fff}
+.cu-l{font-size:10px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.6px}
+.cb{padding:14px 18px}
+.ce{text-align:center;padding:30px 0;color:var(--tm);font-size:13px}
+.ce-i{font-size:32px;margin-bottom:8px;opacity:.4}
+.ci{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--s3);animation:fu .3s ease both}
+.ci:last-child{border-bottom:none}
+.ci-c{width:4px;height:44px;border-radius:2px;flex-shrink:0;margin-top:2px}
+.ci-inf{flex:1;min-width:0}
+.ci-code{font-size:12px;font-weight:700;color:var(--i)}.ci-nm{font-size:13px;font-weight:600;color:var(--tp);margin-top:1px}.ci-mt{font-size:11px;color:var(--tm);margin-top:2px}
+.ci-rm{background:none;border:none;cursor:pointer;color:var(--tm);font-size:15px;padding:4px;border-radius:6px;transition:all .2s;flex-shrink:0}
+.ci-rm:hover{color:var(--r);background:var(--rl)}
+.ulb{margin:16px 0 4px;height:6px;background:var(--s3);border-radius:3px;overflow:hidden}
+.ulb-f{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--i),var(--v));transition:width .4s}
+.ul-lbl{display:flex;justify-content:space-between;font-size:11px;color:var(--tm);margin-bottom:16px}
+/* BUTTONS */
+.btn-p{width:100%;padding:13px;background:linear-gradient(135deg,var(--i),var(--v));color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .25s;box-shadow:0 4px 16px rgba(79,70,229,.35)}
+.btn-p:hover{transform:translateY(-1px);box-shadow:0 6px 22px rgba(79,70,229,.45)}
+.btn-p:disabled{opacity:.45;cursor:not-allowed;pointer-events:none}
+.btn-s{width:100%;padding:11px;background:var(--s2);border:1px solid var(--b);border-radius:12px;color:var(--ts);font-size:14px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .2s;margin-top:8px}
+.btn-s:hover{background:#fff;border-color:var(--il);color:var(--i)}
+/* CARD */
+.card{background:#fff;border:1px solid var(--b);border-radius:18px;overflow:hidden}
+.crd-h{padding:18px 22px 14px;border-bottom:1px solid var(--s3);display:flex;align-items:center;justify-content:space-between}
+.crd-t{font-size:14px;font-weight:600;color:var(--tp)}.crd-b{padding:18px 22px}
+/* REVIEW */
+.rl{display:grid;grid-template-columns:1fr 320px;gap:22px}
+.rt{width:100%;border-collapse:collapse}
+.rt th{text-align:left;padding:0 10px 10px 0;font-size:10.5px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--tm);border-bottom:2px solid var(--s3)}
+.rt td{padding:13px 10px 13px 0;font-size:13px;border-bottom:1px solid var(--s3);vertical-align:middle}
+.rt tr:last-child td{border-bottom:none}
+.ig{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.il{font-size:11px;font-weight:600;color:var(--tm);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.iv{font-size:14px;font-weight:600;color:var(--tp)}
+.chk-l{display:flex;flex-direction:column;gap:12px}
+.chk-i{display:flex;align-items:flex-start;gap:12px;font-size:13px;color:var(--ts);line-height:1.5}
+.chk-i input{width:16px;height:16px;margin-top:2px;accent-color:var(--i);cursor:pointer;flex-shrink:0}
+.sr{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--s3);font-size:13px}
+.sr:last-child{border-bottom:none}.sr.tot{padding-top:14px}
+.sr .lbl{color:var(--ts)}.sr.tot .lbl{font-weight:700;font-size:14px;color:var(--tp)}
+.sr .val{font-weight:600;color:var(--tp)}.sr.tot .val{font-family:'DM Serif Display',serif;font-size:22px;color:var(--i)}
+/* CONFIRM */
+.cs{max-width:560px;margin:0 auto;text-align:center;padding:40px 0}
+.ci-wrap{width:88px;height:88px;border-radius:50%;background:linear-gradient(135deg,rgba(79,70,229,.15),rgba(124,58,237,.1));border:2px solid rgba(79,70,229,.2);display:flex;align-items:center;justify-content:center;font-size:38px;margin:0 auto 28px;animation:pop .6s cubic-bezier(.175,.885,.32,1.275) both}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+.cs-t{font-family:'DM Serif Display',serif;font-size:30px;color:var(--tp);margin-bottom:10px}
+.cs-s{font-size:14px;color:var(--tm);line-height:1.65;margin-bottom:32px}
+.ref{display:inline-block;background:var(--ip);border:1px solid rgba(79,70,229,.2);color:var(--i);padding:10px 20px;border-radius:10px;font-size:13px;font-weight:700;letter-spacing:.5px;margin-bottom:32px}
+.cd{background:#fff;border:1px solid var(--b);border-radius:16px;padding:24px;text-align:left;margin-bottom:28px}
+.cdr{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--s3);font-size:13px}
+.cdr:last-child{border-bottom:none}.cdr .lbl{color:var(--tm)}.cdr .val{font-weight:600;color:var(--tp)}
+.cb-row{display:flex;gap:12px;justify-content:center}
+.btn-pr{padding:12px 24px;background:#fff;border:1.5px solid var(--b);border-radius:12px;color:var(--ts);font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .2s}
+.btn-pr:hover{border-color:var(--i);color:var(--i)}
+.btn-db{padding:12px 24px;background:linear-gradient(135deg,var(--i),var(--v));color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;box-shadow:0 4px 16px rgba(79,70,229,.3);transition:all .2s}
+.btn-db:hover{transform:translateY(-1px)}
+/* TOAST */
+.tc{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:10px}
+.toast{min-width:280px;background:#1e1b3a;border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:12px;transform:translateX(120%);transition:transform .4s cubic-bezier(.175,.885,.32,1.275);box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.toast.show{transform:translateX(0)}
+.ti{font-size:18px;flex-shrink:0}.tm2{font-size:13px;color:rgba(255,255,255,.85);line-height:1.4}
+@media(max-width:1100px){.el,.rl{grid-template-columns:1fr}.cp{position:relative;top:0}}
+@media(max-width:768px){.sidebar{display:none}.hero,.pc{padding:24px 20px}.sg{grid-template-columns:1fr}.sl{display:none}}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--b);border-radius:3px}
+</style>
 </head>
 <body>
+<div class="tc" id="TC"></div>
 
-    <!-- ── SIDEBAR ── -->
-    <aside class="sidebar">
-        <div class="sidebar-brand">
-            <div class="brand-row">
-                <div class="brand-icon">DB</div>
-                <div class="brand-text">
-                    <div class="name">DBTC Portal</div>
-                    <div class="sub">Student Information System</div>
-                </div>
+<aside class="sidebar">
+  <div class="s-logo">DB</div>
+  <nav class="s-nav">
+    <a class="ni" href="dashboard.html" data-tip="Dashboard">🏠</a>
+    <a class="ni active" href="#" data-tip="Enrollment">📋</a>
+    <a class="ni" href="#" data-tip="My Subjects">📚</a>
+    <a class="ni" href="#" data-tip="Grades">📊<span class="pip"></span></a>
+    <div class="s-div"></div>
+    <a class="ni" href="#" data-tip="Schedule">📅</a>
+    <a class="ni" href="#" data-tip="Records">📜</a>
+    <a class="ni" href="#" data-tip="Curriculum">🏫</a>
+    <div class="s-div"></div>
+    <a class="ni" href="#" data-tip="Payments">💳<span class="pip"></span></a>
+    <a class="ni" href="#" data-tip="Assessment">📄</a>
+  </nav>
+  <div class="s-foot">
+    <div class="s-av">JA</div>
+    <a class="ni" href="#" data-tip="Settings" style="width:36px;height:36px">⚙️</a>
+    <button class="s-out">⏻</button>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="hero">
+    <div class="orb o1"></div><div class="orb o2"></div>
+    <div class="h-in">
+      <div>
+        <div class="h-bc"><a href="dashboard.html">Dashboard</a> › Enrollment</div>
+        <div class="h-title">📋 Online Enrollment</div>
+        <div class="h-sub">Select your subjects for A.Y. 2025–2026 · 2nd Semester</div>
+      </div>
+      <div class="pills">
+        <div class="pill"><span class="dot"></span> Enrollment Open</div>
+        <div class="pill warn"><span class="dot"></span> Deadline: Feb 28</div>
+        <div class="pill">Max Load: 24 units</div>
+      </div>
+    </div>
+    <div class="steps">
+      <div class="st active" id="st1" onclick="go(1)"><div class="sn" id="sn1">1</div><span class="sl">Select Subjects</span></div>
+      <div class="sc" id="cn1"></div>
+      <div class="st" id="st2" onclick="go(2)"><div class="sn" id="sn2">2</div><span class="sl">Review & Confirm</span></div>
+      <div class="sc" id="cn2"></div>
+      <div class="st" id="st3"><div class="sn" id="sn3">3</div><span class="sl">Enrolled</span></div>
+    </div>
+  </div>
+
+  <div class="pc">
+    <!-- STEP 1 -->
+    <div class="sp active" id="p1">
+      <div class="fb">
+        <div class="sw"><span>🔍</span><input class="si" id="srch" placeholder="Search subject code or title…" oninput="filt()"></div>
+        <select class="fs" id="df" onchange="filt()"><option value="">All Departments</option><option value="CS">Computer Science</option><option value="MATH">Mathematics</option><option value="ENG">English</option><option value="PE">Physical Education</option><option value="NSTP">NSTP</option></select>
+        <select class="fs" id="dyf" onchange="filt()"><option value="">All Days</option><option>MWF</option><option>TTH</option><option value="SAT">Saturday</option></select>
+      </div>
+      <div class="el">
+        <div>
+          <div class="sh"><span class="stl">Available Subjects</span><span style="font-size:12px;color:var(--tm)" id="scount">14 subjects available</span></div>
+          <div class="sg" id="grid"></div>
+        </div>
+        <div>
+          <div class="sh"><span class="stl">My Cart</span></div>
+          <div class="cp">
+            <div class="ch">
+              <div class="ch-t">Enrollment Cart</div>
+              <div class="ch-s">Review before proceeding</div>
+              <div class="cu-row">
+                <div class="cu"><div class="cu-v" id="csc">0</div><div class="cu-l">Subjects</div></div>
+                <div class="cu"><div class="cu-v" id="cuc">0</div><div class="cu-l">Total Units</div></div>
+              </div>
             </div>
+            <div class="cb">
+              <div id="citems"><div class="ce" id="cempty"><div class="ce-i">📚</div><div>No subjects added yet.<br>Click a subject card to add.</div></div></div>
+              <div class="ulb"><div class="ulb-f" id="ubar" style="width:0%"></div></div>
+              <div class="ul-lbl"><span id="uused">0 / 24 units used</span><span id="urem">24 remaining</span></div>
+              <button class="btn-p" id="pBtn" disabled onclick="go(2)">Review Enrollment →</button>
+              <button class="btn-s" onclick="clrCart()">Clear All</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="sp" id="p2">
+      <div class="rl">
+        <div>
+          <div class="sh"><span class="stl">Enrollment Summary</span></div>
+          <div class="card" style="margin-bottom:22px">
+            <div class="crd-h"><span class="crd-t">📚 Selected Subjects</span><button onclick="go(1)" style="font-size:12px;color:var(--i);background:var(--ip);border:none;padding:5px 10px;border-radius:6px;cursor:pointer;font-weight:600;font-family:inherit">← Edit</button></div>
+            <div style="padding:0"><table class="rt"><thead><tr><th style="padding-left:22px;padding-top:14px">Subject</th><th>Day / Time</th><th>Room</th><th>Instructor</th><th>Units</th></tr></thead><tbody id="rtb"></tbody></table></div>
+          </div>
+          <div class="card">
+            <div class="crd-h"><span class="crd-t">👤 Student Information</span></div>
+            <div class="crd-b"><div class="ig">
+              <div><div class="il">Full Name</div><div class="iv">Jownie Ann Malate</div></div>
+              <div><div class="il">Student No.</div><div class="iv">2024-12345</div></div>
+              <div><div class="il">Course</div><div class="iv">BS Computer Science</div></div>
+              <div><div class="il">Year Level</div><div class="iv">2nd Year</div></div>
+              <div><div class="il">School Year</div><div class="iv">2025–2026</div></div>
+              <div><div class="il">Semester</div><div class="iv">2nd Semester</div></div>
+            </div></div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div class="card">
+            <div class="crd-h"><span class="crd-t">💳 Fee Summary</span></div>
+            <div class="crd-b">
+              <div class="sr"><span class="lbl">Tuition (per unit)</span><span class="val">₱850.00</span></div>
+              <div class="sr"><span class="lbl">Units Enrolled</span><span class="val" id="rvu">0</span></div>
+              <div class="sr"><span class="lbl">Miscellaneous</span><span class="val">₱1,200.00</span></div>
+              <div class="sr"><span class="lbl">Library Fee</span><span class="val">₱250.00</span></div>
+              <div class="sr"><span class="lbl">Laboratory</span><span class="val" id="rvl">₱0.00</span></div>
+              <div class="sr tot"><span class="lbl">Total Assessment</span><span class="val" id="rvt">₱0.00</span></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="crd-h"><span class="crd-t">✅ Acknowledgment</span></div>
+            <div class="crd-b"><div class="chk-l">
+              <label class="chk-i"><input type="checkbox" id="c1"> I have reviewed my subject selections and confirm they are correct.</label>
+              <label class="chk-i"><input type="checkbox" id="c2"> I understand that changes after submission require registrar approval.</label>
+              <label class="chk-i"><input type="checkbox" id="c3"> I agree to settle the assessed fees by the deadline to avoid penalties.</label>
+            </div></div>
+          </div>
+          <button class="btn-p" id="cfBtn" onclick="doSubmit()" disabled>🎓 Submit Enrollment</button>
+          <button class="btn-s" onclick="go(1)">← Back to Selection</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="sp" id="p3">
+      <div style="max-width:720px;margin:0 auto">
+
+        <!-- Success banner -->
+        <div style="background:linear-gradient(135deg,#0f0e1a 0%,#1e1b4b 55%,#2d1b69 100%);border-radius:20px;padding:36px;text-align:center;position:relative;overflow:hidden;margin-bottom:22px">
+          <div style="position:absolute;top:-40px;right:-40px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(124,58,237,.3),transparent 70%)"></div>
+          <div style="position:absolute;bottom:-30px;left:20%;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(79,70,229,.2),transparent 70%)"></div>
+          <div style="position:relative;z-index:1">
+            <div style="width:80px;height:80px;border-radius:50%;background:rgba(110,231,183,.15);border:2px solid rgba(110,231,183,.35);display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 20px;animation:pop .6s cubic-bezier(.175,.885,.32,1.275) both">✅</div>
+            <div style="font-family:'DM Serif Display',serif;font-size:28px;color:#fff;margin-bottom:8px">Successfully Enrolled!</div>
+            <div style="font-size:13px;color:rgba(255,255,255,.55);margin-bottom:20px">Your enrollment for 2nd Semester A.Y. 2025–2026 has been confirmed.</div>
+            <div id="ref" style="display:inline-block;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:10px 22px;border-radius:100px;font-size:13px;font-weight:700;letter-spacing:.5px">REF #: DBTC-2526-0000</div>
+          </div>
         </div>
 
-        <nav class="sidebar-nav">
-            <div class="nav-label">Main</div>
-            <a href="#" class="nav-item active">
-                <span class="nav-icon">🏠</span> Dashboard
-            </a>
-            <a href="#" class="nav-item">
-                <span class="nav-icon">📋</span> My Enrollment
-            </a>
-            <a href="#" class="nav-item">
-                <span class="nav-icon">📚</span> My Subjects
-            </a>
-            <a href="#" class="nav-item">
-                <span class="nav-icon">📊</span> Grades
-                <span class="nav-badge">1st Sem</span>
-            </a>
-
-            <div class="nav-label">Academic</div>
-            <a href="#" class="nav-item">
-                <span class="nav-icon">📅</span> Schedule
-            </a>
-            <a href="#" class="nav-item">
-                <span class="nav-icon">📜</span> Records
-            </a>
-            <a href="#" class="nav-item">
-                <span class="nav-icon">🏫</span> Curriculum
-            </a>
-
-            <div class="nav-label">Finance</div>
-            <a href="#" class="nav-item">
-                <span class="nav-icon">💳</span> Payments
-                <span class="nav-badge" style="background:#dc2626;">!</span>
-            </a>
-            <a href="#" class="nav-item">
-                <span class="nav-icon">📄</span> Assessment
-            </a>
-
-            <div class="nav-label">Account</div>
-            <a href="#" class="nav-item">
-                <span class="nav-icon">👤</span> Profile
-            </a>
-            <a href="#" class="nav-item">
-                <span class="nav-icon">⚙️</span> Settings
-            </a>
-        </nav>
-
-        <div class="sidebar-footer">
-            <div class="student-card">
-                <div class="avatar">JD</div>
-                <div class="student-info">
-                    <div class="sname">Juan Dela Cruz</div>
-                    <div class="sid">2024-12345</div>
+        <!-- Status + summary row -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px">
+          <div class="card">
+            <div class="crd-h"><span class="crd-t">📋 Enrollment Status</span></div>
+            <div class="crd-b">
+              <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+                <div style="width:44px;height:44px;border-radius:12px;background:var(--gl);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🎓</div>
+                <div>
+                  <div style="font-weight:700;font-size:15px;color:var(--tp)">Enrollment Confirmed</div>
+                  <div style="font-size:12px;color:var(--tm);margin-top:2px" id="s3date"></div>
                 </div>
-                <button class="logout-btn" onclick="window.location.href='login.html'" title="Logout">⏻</button>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--ts)">Student</span><span style="font-weight:600">Jownie Ann Malate</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--ts)">Student No.</span><span style="font-weight:600">2024-12345</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--ts)">Semester</span><span style="font-weight:600">2nd Sem · A.Y. 2025–2026</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--ts)">Status</span><span style="font-weight:700;color:var(--g)">✅ Enrolled</span></div>
+              </div>
             </div>
+          </div>
+          <div class="card">
+            <div class="crd-h"><span class="crd-t">💳 Fee Assessment</span></div>
+            <div class="crd-b" id="s3fees">
+              <div style="display:flex;flex-direction:column;gap:8px"></div>
+            </div>
+          </div>
         </div>
-    </aside>
 
-    <!-- ── MAIN ── -->
-    <main class="main">
+        <!-- Enrolled subjects table -->
+        <div class="card" style="margin-bottom:22px">
+          <div class="crd-h">
+            <span class="crd-t">📚 Enrolled Subjects</span>
+            <span id="s3badge" style="background:var(--ip);color:var(--i);font-size:12px;font-weight:700;padding:4px 10px;border-radius:6px"></span>
+          </div>
+          <div style="padding:0">
+            <table class="rt">
+              <thead><tr>
+                <th style="padding-left:22px;padding-top:14px">#</th>
+                <th>Subject</th>
+                <th>Day / Time</th>
+                <th>Room</th>
+                <th>Instructor</th>
+                <th>Units</th>
+                <th>Status</th>
+              </tr></thead>
+              <tbody id="s3tbody"></tbody>
+            </table>
+          </div>
+        </div>
 
-        <!-- Topbar -->
-        <header class="topbar">
-            <div class="topbar-left">
-                <h1>Good morning, Niel! 👋</h1>
-                <p>Here's your academic overview for today</p>
+        <!-- Next steps -->
+        <div class="card" style="margin-bottom:22px">
+          <div class="crd-h"><span class="crd-t">📌 What's Next?</span></div>
+          <div class="crd-b">
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+              <div style="background:var(--s2);border:1px solid var(--b);border-radius:12px;padding:16px;text-align:center">
+                <div style="font-size:24px;margin-bottom:8px">💳</div>
+                <div style="font-size:13px;font-weight:700;color:var(--tp);margin-bottom:4px">Pay Your Fees</div>
+                <div style="font-size:12px;color:var(--tm)">Settle assessment before the deadline to avoid penalties.</div>
+              </div>
+              <div style="background:var(--s2);border:1px solid var(--b);border-radius:12px;padding:16px;text-align:center">
+                <div style="font-size:24px;margin-bottom:8px">📅</div>
+                <div style="font-size:13px;font-weight:700;color:var(--tp);margin-bottom:4px">Check Your Schedule</div>
+                <div style="font-size:12px;color:var(--tm)">View your full class schedule in the portal.</div>
+              </div>
+              <div style="background:var(--s2);border:1px solid var(--b);border-radius:12px;padding:16px;text-align:center">
+                <div style="font-size:24px;margin-bottom:8px">📧</div>
+                <div style="font-size:13px;font-weight:700;color:var(--tp);margin-bottom:4px">Check Your Email</div>
+                <div style="font-size:12px;color:var(--tm)">A confirmation receipt has been sent to your email.</div>
+              </div>
             </div>
-            <div class="topbar-right">
-                <span class="semester-badge">A.Y. 2025–2026 · 2nt Semester</span>
-                <div class="notif-btn">🔔<span class="notif-dot"></span></div>
-            </div>
-        </header>
+          </div>
+        </div>
 
-        <div class="page-content">
+        <div style="display:flex;gap:12px;justify-content:center">
+          <button class="btn-pr" onclick="window.print()">🖨️ Print Form</button>
+          <button class="btn-db" onclick="location.href='dashboard.html'">Go to Dashboard →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
 
-            <!-- Student Info Banner -->
-            <div class="info-banner" id="studentBanner" style="display:none; animation: fadeSlideIn 0.5s ease both;">
-                <div class="banner-avatar" id="dynInitials">JD</div>
-                <div class="banner-info">
-                    <div class="banner-name" id="dynName">Loading student name...</div>
-                    <div style="color:rgba(255,255,255,0.55); font-size:14px;" id="dynCourse">Loading course info...</div>
-                    <div class="banner-meta">
-                        <span class="meta-pill">🎓 College of Computer Studies</span>
-                        <span class="meta-pill" id="dynNo">📌 Student No. Loading...</span>
-                        <span class="meta-pill" id="dynEmail">✉️ Loading email...</span>
-                    </div>
-                </div>
-                <div class="banner-actions">
-                <div class="banner-actions">
-                    <button class="btn-outline-white" onclick="window.location.href='Enrollment.html'">📋 Enroll</button>
-                    <button class="btn-white" onclick="logout()">🚪 Logout</button>
-                </div>
-            </div>
+<script>
+const COLS=['#4f46e5','#7c3aed','#2563eb','#059669','#d97706','#dc2626','#be185d'];
+const MAX=24;
+const DATA=[
+  {id:1,code:'CS 201',name:'Data Structures & Algorithms',dept:'CS',day:'MWF',time:'7:30–9:00',room:'Lab 3',units:3,type:'Lab',ins:'Prof. Reyes',slots:25,taken:18},
+  {id:2,code:'CS 202',name:'Object-Oriented Programming',dept:'CS',day:'TTH',time:'9:00–10:30',room:'Rm 204',units:3,type:'Lec',ins:'Prof. Santos',slots:40,taken:22},
+  {id:3,code:'CS 203',name:'Computer Organization',dept:'CS',day:'TTH',time:'1:00–2:30',room:'Rm 302',units:3,type:'Lec',ins:'Prof. Cruz',slots:35,taken:30},
+  {id:4,code:'CS 204',name:'Software Engineering I',dept:'CS',day:'MWF',time:'1:00–2:30',room:'Lab 2',units:3,type:'Lab',ins:'Prof. Dela Rosa',slots:30,taken:10},
+  {id:5,code:'CS 205',name:'Web Development',dept:'CS',day:'TTH',time:'3:00–4:30',room:'Lab 1',units:3,type:'Lab',ins:'Prof. Mendoza',slots:30,taken:28},
+  {id:6,code:'CS 206',name:'Database Management Systems',dept:'CS',day:'MWF',time:'10:30–12:00',room:'Rm 201',units:3,type:'Lec',ins:'Prof. Garcia',slots:40,taken:15},
+  {id:7,code:'MATH 201',name:'Discrete Mathematics',dept:'MATH',day:'MWF',time:'10:30–12:00',room:'Rm 110',units:3,type:'Lec',ins:'Prof. Torres',slots:40,taken:35},
+  {id:8,code:'MATH 202',name:'Calculus for Computing',dept:'MATH',day:'TTH',time:'7:30–9:00',room:'Rm 108',units:3,type:'Lec',ins:'Prof. Aquino',slots:45,taken:20},
+  {id:9,code:'ENG 201',name:'Technical Communication',dept:'ENG',day:'SAT',time:'8:00–11:00',room:'Rm 105',units:3,type:'Lec',ins:'Prof. Villanueva',slots:35,taken:12},
+  {id:10,code:'ENG 202',name:'Business Communication',dept:'ENG',day:'TTH',time:'4:30–6:00',room:'Rm 103',units:3,type:'Lec',ins:'Prof. Ocampo',slots:40,taken:8},
+  {id:11,code:'NSTP 101',name:'National Service Training I',dept:'NSTP',day:'SAT',time:'1:00–4:00',room:'Gym',units:3,type:'Lec',ins:'Prof. Bautista',slots:60,taken:40},
+  {id:12,code:'PE 201',name:'Physical Education 2',dept:'PE',day:'TTH',time:'4:00–5:30',room:'Court',units:2,type:'Lec',ins:'Coach Lim',slots:40,taken:20},
+  {id:13,code:'CS 207',name:'Computer Networks',dept:'CS',day:'MWF',time:'2:30–4:00',room:'Lab 4',units:3,type:'Lab',ins:'Prof. Navarro',slots:25,taken:25},
+  {id:14,code:'CS 208',name:'Operating Systems',dept:'CS',day:'TTH',time:'10:30–12:00',room:'Rm 305',units:3,type:'Lec',ins:'Prof. Espiritu',slots:35,taken:14},
+];
 
-            <!-- Stat Cards -->
-            <div class="stats-row">
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <div class="stat-icon" style="background:#ede9fe;">📚</div>
-                        <span class="stat-trend trend-up">+2</span>
-                    </div>
-                    <div class="stat-value">7</div>
-                    <div class="stat-label">Enrolled Subjects</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <div class="stat-icon" style="background:#dbeafe;">📐</div>
-                        <span class="stat-trend trend-neu">—</span>
-                    </div>
-                    <div class="stat-value">21</div>
-                    <div class="stat-label">Total Units</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <div class="stat-icon" style="background:#d1fae5;">🏆</div>
-                        <span class="stat-trend trend-up">↑ 0.2</span>
-                    </div>
-                    <div class="stat-value">1.62</div>
-                    <div class="stat-label">Current GWA</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <div class="stat-icon" style="background:#fce7f3;">💳</div>
-                        <span class="stat-trend trend-down">Due</span>
-                    </div>
-                    <div class="stat-value">₱4,200</div>
-                    <div class="stat-label">Balance Due</div>
-                </div>
-            </div>
+let cart=[],cur=1;
 
-            <!-- Schedule + GWA -->
-            <div class="grid-3-1">
-                <!-- Schedule -->
-                <div class="card">
-                    <div class="card-header">
-                        <span class="card-title">📅 Class Schedule</span>
-                        <a href="#" class="card-link">Full Schedule →</a>
-                    </div>
-                    <div class="card-body" style="padding-top:14px;">
-                        <table class="schedule-table">
-                            <thead>
-                                <tr>
-                                    <th style="width:45%">Subject</th>
-                                    <th>Day</th>
-                                    <th>Time</th>
-                                    <th>Room</th>
-                                    <th>Units</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <div class="subj-code">CS 201</div>
-                                        <div class="subj-name">Data Structures & Algorithms</div>
-                                    </td>
-                                    <td><span class="day-badge day-mwf">MWF</span></td>
-                                    <td style="font-size:12px;color:var(--text-secondary);">7:30–9:00</td>
-                                    <td style="font-size:12px;color:var(--text-secondary);">Lab 3</td>
-                                    <td><span class="units-badge">3</span></td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="subj-code">CS 202</div>
-                                        <div class="subj-name">Object-Oriented Programming</div>
-                                    </td>
-                                    <td><span class="day-badge day-tth">TTH</span></td>
-                                    <td style="font-size:12px;color:var(--text-secondary);">9:00–10:30</td>
-                                    <td style="font-size:12px;color:var(--text-secondary);">Rm 204</td>
-                                    <td><span class="units-badge">3</span></td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="subj-code">MATH 201</div>
-                                        <div class="subj-name">Discrete Mathematics</div>
-                                    </td>
-                                    <td><span class="day-badge day-mwf">MWF</span></td>
-                                    <td style="font-size:12px;color:var(--text-secondary);">10:30–12:00</td>
-                                    <td style="font-size:12px;color:var(--text-secondary);">Rm 110</td>
-                                    <td><span class="units-badge">3</span></td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="subj-code">CS 203</div>
-                                        <div class="subj-name">Computer Organization</div>
-                                    </td>
-                                    <td><span class="day-badge day-tth">TTH</span></td>
-                                    <td style="font-size:12px;color:var(--text-secondary);">1:00–2:30</td>
-                                    <td style="font-size:12px;color:var(--text-secondary);">Rm 302</td>
-                                    <td><span class="units-badge">3</span></td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="subj-code">ENG 201</div>
-                                        <div class="subj-name">Technical Communication</div>
-                                    </td>
-                                    <td><span class="day-badge day-sat">SAT</span></td>
-                                    <td style="font-size:12px;color:var(--text-secondary);">8:00–11:00</td>
-                                    <td style="font-size:12px;color:var(--text-secondary);">Rm 105</td>
-                                    <td><span class="units-badge">3</span></td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="subj-code">NSTP 101</div>
-                                        <div class="subj-name">National Service Training</div>
-                                    </td>
-                                    <td><span class="day-badge day-sat">SAT</span></td>
-                                    <td style="font-size:12px;color:var(--text-secondary);">1:00–4:00</td>
-                                    <td style="font-size:12px;color:var(--text-secondary);">Gym</td>
-                                    <td><span class="units-badge">3</span></td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="subj-code">PE 201</div>
-                                        <div class="subj-name">Physical Education 2</div>
-                                    </td>
-                                    <td><span class="day-badge day-tth">TTH</span></td>
-                                    <td style="font-size:12px;color:var(--text-secondary);">4:00–5:30</td>
-                                    <td style="font-size:12px;color:var(--text-secondary);">Court</td>
-                                    <td><span class="units-badge">3</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+const toMin=t=>{const[h,m]=t.split(':').map(Number);return h*60+(m||0)};
+const overlap=(t1,t2)=>{const p=t=>{const[s,e]=t.split('–');return[toMin(s),toMin(e)]};const[s1,e1]=p(t1),[s2,e2]=p(t2);return s1<e2&&s2<e1};
+const dayC=d=>d==='MWF'?'mwf':d==='TTH'?'tth':'sat';
+const peso=n=>`₱${n.toLocaleString()}.00`;
+const totUnits=()=>cart.reduce((a,c)=>a+c.units,0);
 
-                <!-- GWA Card -->
-                <div class="card">
-                    <div class="card-header">
-                        <span class="card-title">🏆 GWA Overview</span>
-                    </div>
-                    <div class="card-body">
-                        <div class="gwa-display">
-                            <div class="gwa-number">1.62</div>
-                            <div class="gwa-label">General Weighted Average</div>
-                        </div>
-                        <div class="gwa-bar-wrap"><div class="gwa-bar"></div></div>
-                        <div class="gwa-meta">
-                            <span>1.0 (Highest)</span>
-                            <span>5.0 (Lowest)</span>
-                        </div>
-                        <div class="honor-badge">🌟 Dean's List Candidate</div>
-                    </div>
-                </div>
-            </div>
-            
+function render(list){
+  document.getElementById('scount').textContent=`${list.length} subject${list.length!==1?'s':''} available`;
+  document.getElementById('grid').innerHTML='';
+  list.forEach(s=>{
+    const inC=cart.some(c=>c.id===s.id),full=s.taken>=s.slots,pct=(s.taken/s.slots)*100,left=s.slots-s.taken;
+    const conf=!inC&&!full&&cart.some(c=>c.day===s.day&&overlap(c.time,s.time));
+    const d=document.createElement('div');
+    d.className=`sc2${inC?' sel':''}${(full||conf)&&!inC?' conf':''}`;
+    d.innerHTML=`<div class="sc-top"><div><div class="sc-code">${s.code}</div><div class="sc-name">${s.name}</div></div><div class="ck">${inC?'✓':''}</div></div>
+    <div class="sc-meta"><span class="tag ${dayC(s.day)}">${s.day}</span><span class="tag tlec">${s.time}</span><span class="tag ${s.type==='Lab'?'tlab':'tlec'}">${s.type}</span><span class="tag tun">${s.units} units</span>${conf?'<span class="tag tcfl">⚠ Conflict</span>':''}${full?'<span class="tag tcfl">Full</span>':''}</div>
+    <div class="sc-inst">👨‍🏫 ${s.ins}</div>
+    <div class="sc-slots"><span style="font-size:11px;color:var(--tm)">Slots</span><div class="sb2"><div class="sbf ${pct>=100?'sfl':pct>=80?'swn':'sok'}" style="width:${pct}%"></div></div><span style="font-size:11px;color:var(--tm)">${left>0?left+' left':'Full'}</span></div>`;
+    if(!full&&!conf)d.onclick=()=>tog(s.id);
+    document.getElementById('grid').appendChild(d);
+  });
+}
 
-            <!-- Grades + Announcements -->
-            <div class="grid-2">
-                <!-- Grades -->
-                <div class="card">
-                    <div class="card-header">
-                        <span class="card-title">📊 Latest Grades</span>
-                        <a href="#" class="card-link">View All →</a>
-                    </div>
-                    <div class="card-body" style="padding-top:10px;">
-                        <div class="grade-row">
-                            <div class="grade-subj">
-                                <div class="code">CS 201</div>
-                                <div class="name">Data Structures</div>
-                            </div>
-                            <div class="grade-bar-wrap"><div class="grade-bar" style="width:95%;background:linear-gradient(90deg,#4f46e5,#7c3aed);"></div></div>
-                            <div class="grade-value" style="color:#4f46e5;">1.25</div>
-                            <span class="grade-status gs-pass">Pass</span>
-                        </div>
-                        <div class="grade-row">
-                            <div class="grade-subj">
-                                <div class="code">CS 202</div>
-                                <div class="name">OOP</div>
-                            </div>
-                            <div class="grade-bar-wrap"><div class="grade-bar" style="width:88%;background:linear-gradient(90deg,#059669,#10b981);"></div></div>
-                            <div class="grade-value" style="color:#059669;">1.50</div>
-                            <span class="grade-status gs-pass">Pass</span>
-                        </div>
-                        <div class="grade-row">
-                            <div class="grade-subj">
-                                <div class="code">MATH 201</div>
-                                <div class="name">Discrete Math</div>
-                            </div>
-                            <div class="grade-bar-wrap"><div class="grade-bar" style="width:75%;background:linear-gradient(90deg,#d97706,#f59e0b);"></div></div>
-                            <div class="grade-value" style="color:#d97706;">1.75</div>
-                            <span class="grade-status gs-pass">Pass</span>
-                        </div>
-                        <div class="grade-row">
-                            <div class="grade-subj">
-                                <div class="code">CS 203</div>
-                                <div class="name">Computer Org.</div>
-                            </div>
-                            <div class="grade-bar-wrap"><div class="grade-bar" style="width:90%;background:linear-gradient(90deg,#2563eb,#3b82f6);"></div></div>
-                            <div class="grade-value" style="color:#2563eb;">1.50</div>
-                            <span class="grade-status gs-pass">Pass</span>
-                        </div>
-                        <div class="grade-row">
-                            <div class="grade-subj">
-                                <div class="code">ENG 201</div>
-                                <div class="name">Tech Communication</div>
-                            </div>
-                            <div class="grade-bar-wrap"><div class="grade-bar" style="width:60%;background:linear-gradient(90deg,#dc2626,#ef4444);"></div></div>
-                            <div class="grade-value" style="color:#dc2626;">2.25</div>
-                            <span class="grade-status gs-warn">Watch</span>
-                        </div>
-                        <div class="grade-row">
-                            <div class="grade-subj">
-                                <div class="code">NSTP 101</div>
-                                <div class="name">NSTP</div>
-                            </div>
-                            <div class="grade-bar-wrap"><div class="grade-bar" style="width:50%;background:#cbd5e0;"></div></div>
-                            <div class="grade-value" style="color:#94a3b8;">—</div>
-                            <span class="grade-status gs-pending">Pending</span>
-                        </div>
-                    </div>
-                </div>
+function tog(id){
+  const s=DATA.find(x=>x.id===id),inC=cart.some(c=>c.id===id);
+  if(inC){cart=cart.filter(c=>c.id!==id);toast('info',`Removed: ${s.code}`);}
+  else{
+    if(totUnits()+s.units>MAX){toast('warn','Unit limit reached',`Max ${MAX} units allowed.`);return;}
+    cart.push(s);toast('success',`Added: ${s.code}`,s.name);
+  }
+  upCart();filt();
+}
 
-                <!-- Right column: Announcements + Quick Links -->
-                <div style="display:flex;flex-direction:column;gap:22px;">
+function upCart(){
+  const tu=totUnits();
+  document.getElementById('csc').textContent=cart.length;
+  document.getElementById('cuc').textContent=tu;
+  document.getElementById('ubar').style.width=`${(tu/MAX)*100}%`;
+  document.getElementById('uused').textContent=`${tu} / ${MAX} units used`;
+  document.getElementById('urem').textContent=`${MAX-tu} remaining`;
+  document.getElementById('pBtn').disabled=cart.length===0;
+  document.getElementById('cempty').style.display=cart.length===0?'block':'none';
+  document.querySelectorAll('.ci').forEach(e=>e.remove());
+  cart.forEach((s,i)=>{
+    const el=document.createElement('div');el.className='ci';
+    el.innerHTML=`<div class="ci-c" style="background:${COLS[i%COLS.length]}"></div><div class="ci-inf"><div class="ci-code">${s.code}</div><div class="ci-nm">${s.name}</div><div class="ci-mt">${s.day} · ${s.time} · ${s.units} units</div></div><button class="ci-rm" onclick="tog(${s.id})">✕</button>`;
+    document.getElementById('citems').appendChild(el);
+  });
+}
 
-                    <!-- Announcements -->
-                    <div class="card">
-                        <div class="card-header">
-                            <span class="card-title">📢 Announcements</span>
-                            <a href="#" class="card-link">All →</a>
-                        </div>
-                        <div class="card-body" style="padding-top:8px;">
-                            <div class="ann-item ann-urgent">
-                                <div class="ann-icon">🚨</div>
-                                <div class="ann-body">
-                                    <div class="ann-title">Enrollment Deadline Extended</div>
-                                    <div class="ann-desc">2nd semester enrollment has been extended until Feb 28, 2025. Late fees apply after Feb 21.</div>
-                                    <div class="ann-time">2 hours ago</div>
-                                </div>
-                            </div>
-                            <div class="ann-item ann-info">
-                                <div class="ann-icon">📘</div>
-                                <div class="ann-body">
-                                    <div class="ann-title">Midterm Exam Schedule Released</div>
-                                    <div class="ann-desc">Check the registrar's portal for your midterm examination schedule and room assignments.</div>
-                                    <div class="ann-time">Yesterday</div>
-                                </div>
-                            </div>
-                            <div class="ann-item ann-green">
-                                <div class="ann-icon">🏆</div>
-                                <div class="ann-body">
-                                    <div class="ann-title">Dean's List — 1st Semester</div>
-                                    <div class="ann-desc">Congratulations to all students who made the 1st Semester Dean's List! Recognition on Feb 20.</div>
-                                    <div class="ann-time">2 days ago</div>
-                                </div>
-                            </div>
-                            <div class="ann-item ann-amber">
-                                <div class="ann-icon">💳</div>
-                                <div class="ann-body">
-                                    <div class="ann-title">Payment Reminder</div>
-                                    <div class="ann-desc">Outstanding balance of ₱4,200. Settle before Feb 28 to avoid late charges.</div>
-                                    <div class="ann-time">3 days ago</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+function clrCart(){cart=[];upCart();filt();toast('info','Cart cleared')}
 
-                    <!-- Quick Links -->
-                    <div class="card">
-                        <div class="card-header">
-                            <span class="card-title">⚡ Quick Links</span>
-                        </div>
-                        <div class="card-body">
-                            <div class="quick-links">
-                                <a href="enrollment.html" class="quick-link">
-                                    <div class="ql-icon" style="background:#ede9fe;">🎓</div>
-                                    <div class="ql-text">
-                                        <div class="ql-name">Enroll Now</div>
-                                        <div class="ql-sub">2nd Semester</div>
-                                    </div>
-                                    <span class="ql-arrow">›</span>
-                                </a>
-                                <a href="#" class="quick-link">
-                                    <div class="ql-icon" style="background:#dbeafe;">📊</div>
-                                    <div class="ql-text">
-                                        <div class="ql-name">View Grades</div>
-                                        <div class="ql-sub">1st Semester</div>
-                                    </div>
-                                    <span class="ql-arrow">›</span>
-                                </a>
-                                <a href="#" class="quick-link">
-                                    <div class="ql-icon" style="background:#fce7f3;">💳</div>
-                                    <div class="ql-text">
-                                        <div class="ql-name">Pay Balance</div>
-                                        <div class="ql-sub">₱4,200 due</div>
-                                    </div>
-                                    <span class="ql-arrow">›</span>
-                                </a>
-                                <a href="#" class="quick-link">
-                                    <div class="ql-icon" style="background:#d1fae5;">📜</div>
-                                    <div class="ql-text">
-                                        <div class="ql-name">Request COE</div>
-                                        <div class="ql-sub">Certification</div>
-                                    </div>
-                                    <span class="ql-arrow">›</span>
-                                </a>
-                                <a href="#" class="quick-link">
-                                    <div class="ql-icon" style="background:#fef3c7;">📅</div>
-                                    <div class="ql-text">
-                                        <div class="ql-name">Schedule</div>
-                                        <div class="ql-sub">This semester</div>
-                                    </div>
-                                    <span class="ql-arrow">›</span>
-                                </a>
-                                <a href="#" class="quick-link">
-                                    <div class="ql-icon" style="background:#e0e7ff;">📄</div>
-                                    <div class="ql-text">
-                                        <div class="ql-name">Transcript</div>
-                                        <div class="ql-sub">Request TOR</div>
-                                    </div>
-                                    <span class="ql-arrow">›</span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
+function filt(){
+  const q=document.getElementById('srch').value.toLowerCase(),dept=document.getElementById('df').value,day=document.getElementById('dyf').value;
+  render(DATA.filter(s=>(!q||s.code.toLowerCase().includes(q)||s.name.toLowerCase().includes(q))&&(!dept||s.code.startsWith(dept))&&(!day||s.day===day)));
+}
 
-                </div>
-            </div>
+function go(n){
+  if(n===2&&cart.length===0){toast('warn','No subjects selected','Please add at least one subject.');return;}
+  if(n===3&&cur<2)return;
+  cur=n;
+  for(let i=1;i<=3;i++){
+    document.getElementById(`p${i}`).classList.toggle('active',i===n);
+    const t=document.getElementById(`st${i}`);
+    t.classList.remove('active','done');
+    if(i===n)t.classList.add('active');else if(i<n)t.classList.add('done');
+    document.getElementById(`sn${i}`).textContent=i<n?'✓':i;
+    if(i<3)document.getElementById(`cn${i}`).classList.toggle('done',i<n);
+  }
+  if(n===2)revRender();
+}
 
-        </div><!-- /page-content -->
-    </main>
+function revRender(){
+  const tb=document.getElementById('rtb');tb.innerHTML='';
+  cart.forEach((s,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="padding-left:22px"><div style="display:flex;align-items:center;gap:10px"><div style="width:3px;height:36px;border-radius:2px;background:${COLS[i%COLS.length]};flex-shrink:0"></div><div><div style="font-weight:700">${s.code}</div><div style="font-size:12px;color:var(--tm)">${s.name}</div></div></div></td>
+    <td><span class="tag ${dayC(s.day)}" style="font-size:11px">${s.day}</span> <span style="font-size:12px;color:var(--tm)">${s.time}</span></td>
+    <td style="font-size:12px;color:var(--ts)">${s.room}</td><td style="font-size:12px;color:var(--ts)">${s.ins}</td>
+    <td><span class="tag tun">${s.units}</span></td>`;
+    tb.appendChild(tr);
+  });
+  const tu=totUnits(),lc=cart.filter(c=>c.type==='Lab').length,lf=lc*300,tot=tu*850+1200+250+lf;
+  document.getElementById('rvu').textContent=tu;
+  document.getElementById('rvl').textContent=peso(lf);
+  document.getElementById('rvt').textContent=peso(tot);
+  ['c1','c2','c3'].forEach(id=>document.getElementById(id).onchange=updChk);
+  updChk();
+}
 
-    <script>
-        const API = 'http://localhost:5130/api';
+function updChk(){document.getElementById('cfBtn').disabled=!['c1','c2','c3'].every(id=>document.getElementById(id).checked)}
 
-        function getToken() { return sessionStorage.getItem('jwt') || localStorage.getItem('jwt'); }
+function doSubmit(){
+  const btn=document.getElementById('cfBtn');btn.textContent='Submitting…';btn.disabled=true;
+  setTimeout(()=>{
+    const tu=totUnits(),lc=cart.filter(c=>c.type==='Lab').length,lf=lc*300,tot=tu*850+1200+250+lf;
+    const ref='DBTC-2526-'+Math.floor(1000+Math.random()*9000);
+    const now=new Date();
 
-        function logout() {
-            sessionStorage.removeItem('jwt');
-            localStorage.removeItem('jwt');
-            sessionStorage.removeItem('email');
-            localStorage.removeItem('email');
-            sessionStorage.removeItem('roles');
-            localStorage.removeItem('roles');
-            window.location.href = 'LogIn.html';
-        }
+    // Ref number
+    document.getElementById('ref').textContent=`REF #: ${ref}`;
 
-        async function fetchStudentProfile() {
-            const token = getToken();
-            if (!token) {
-                window.location.href = 'LogIn.html';
-                return;
-            }
+    // Date
+    document.getElementById('s3date').textContent=now.toLocaleDateString('en-PH',{year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'});
 
-            try {
-                const res = await fetch(`${API}/Auth/me`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+    // Fee breakdown
+    document.getElementById('s3fees').innerHTML=`
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--ts)">Tuition (${tu} units × ₱850)</span><span style="font-weight:600">${peso(tu*850)}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--ts)">Miscellaneous</span><span style="font-weight:600">₱1,200.00</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--ts)">Library Fee</span><span style="font-weight:600">₱250.00</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--ts)">Laboratory (${lc} subjects)</span><span style="font-weight:600">${peso(lf)}</span></div>
+        <div style="border-top:1px solid var(--b);padding-top:10px;margin-top:4px;display:flex;justify-content:space-between;align-items:center">
+          <span style="font-weight:700;font-size:14px;color:var(--tp)">Total Assessment</span>
+          <span style="font-family:'DM Serif Display',serif;font-size:22px;color:var(--i)">${peso(tot)}</span>
+        </div>
+      </div>`;
 
-                if (!res.ok) {
-                    if (res.status === 401) logout();
-                    return;
-                }
+    // Badge
+    document.getElementById('s3badge').textContent=`${cart.length} subjects · ${tu} units`;
 
-                const user = await res.json();
-                
-                // If they are an Admin, redirect them to the Admin panel instead
-                const isStudent = user.roles.includes('Student');
-                if (!isStudent && (user.roles.includes('Admin') || user.roles.includes('Registrar') || user.roles.includes('Cashier'))) {
-                    window.location.href = 'RoleManagement.html';
-                    return;
-                }
-                
-                // Populate Profile
-                const profile = user.profile || {};
-                const name = profile.firstName && profile.lastName ? `${profile.firstName} ${profile.lastName}` : (profile.firstName || user.email);
-                
-                document.getElementById('dynName').textContent = name;
-                document.getElementById('dynEmail').textContent = `✉️ ${user.email}`;
-                document.getElementById('dynNo').textContent = `📌 Student No. ${profile.studentNumber || 'TBD'}`;
-                
-                let courseStr = 'BS Computer Science · 2nd Year';
-                if (profile.enrollmentStatus) courseStr += ` · ${profile.enrollmentStatus} Student`;
-                document.getElementById('dynCourse').textContent = courseStr;
+    // Subjects table
+    const tb=document.getElementById('s3tbody');tb.innerHTML='';
+    cart.forEach((s,i)=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML=`
+        <td style="padding-left:22px;font-size:13px;color:var(--tm);font-weight:600">${i+1}</td>
+        <td><div style="display:flex;align-items:center;gap:10px">
+          <div style="width:3px;height:36px;border-radius:2px;background:${COLS[i%COLS.length]};flex-shrink:0"></div>
+          <div><div style="font-weight:700;font-size:13px">${s.code}</div><div style="font-size:12px;color:var(--tm)">${s.name}</div></div>
+        </div></td>
+        <td><span class="tag ${dayC(s.day)}" style="font-size:11px">${s.day}</span> <span style="font-size:12px;color:var(--tm)">${s.time}</span></td>
+        <td style="font-size:12px;color:var(--ts)">${s.room}</td>
+        <td style="font-size:12px;color:var(--ts)">${s.ins}</td>
+        <td><span class="tag tun">${s.units}</span></td>
+        <td><span style="background:var(--gl);color:var(--g);font-size:11px;font-weight:700;padding:3px 8px;border-radius:5px">✓ Enrolled</span></td>`;
+      tb.appendChild(tr);
+    });
 
-                // Initials
-                const initials = (profile.firstName ? profile.firstName[0] : user.email[0]).toUpperCase();
-                document.getElementById('dynInitials').textContent = initials;
-                
-                document.getElementById('studentBanner').style.display = 'flex';
+    go(3);
+    toast('success','Successfully Enrolled!','Check your email for your confirmation receipt.');
+  },1800);
+}
 
-            } catch (err) {
-                console.error("Failed to fetch profile", err);
-                document.getElementById('studentBanner').style.display = 'flex';
-                document.getElementById('dynName').textContent = 'Welcome, Student';
-            }
-        }
+function toast(type,title,msg=''){
+  const icons={success:'✅',error:'❌',warn:'⚠️',info:'ℹ️'};
+  const t=document.createElement('div');t.className='toast';
+  t.innerHTML=`<span class="ti">${icons[type]}</span><div class="tm2"><strong>${title}</strong>${msg?'<br>'+msg:''}</div>`;
+  document.getElementById('TC').appendChild(t);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>t.classList.add('show')));
+  setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),400)},3200);
+}
 
-        fetchStudentProfile();
-    </script>
+render(DATA);upCart();
+</script>
 </body>
 </html>

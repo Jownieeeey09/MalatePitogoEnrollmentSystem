@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard — DBTC Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --indigo: #4f46e5;
+            --indigo-dark: #3730a3;
+            --violet: #7c3aed;
+            --indigo-light: #818cf8;
+            --indigo-pale: rgba(79,70,229,0.10);
+            --surface: #ffffff;
+            --surface-2: #f8fafc;
+            --surface-3: #f1f5f9;
+            --border: #e2e8f0;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --green: #059669;
+            --green-light: #d1fae5;
+            --amber: #d97706;
+            --amber-light: #fef3c7;
+            --red: #dc2626;
+            --red-light: #fee2e2;
+            --blue: #2563eb;
+            --blue-light: #dbeafe;
+            --sidebar-bg: #0f0e1a;
+            --sidebar-w: 72px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--surface-2);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* ══════════════════════════════════════
+           SIDEBAR — slim icon rail
+        ══════════════════════════════════════ */
+        .sidebar {
+            width: var(--sidebar-w);
+            background: var(--sidebar-bg);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            flex-shrink: 0;
+            z-index: 100;
+            border-right: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .sidebar-logo {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, var(--indigo), var(--violet));
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'DM Serif Display', serif;
+            font-size: 15px; color: white; font-weight: 700;
+            margin: 20px 0 28px;
+            flex-shrink: 0;
+            box-shadow: 0 4px 16px rgba(79,70,229,0.4);
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            width: 100%;
+            padding: 0 10px;
+        }
+
+        .nav-divider {
+            width: 32px; height: 1px;
+            background: rgba(255,255,255,0.07);
+            margin: 10px 0;
+        }
+
+        .nav-item {
+            position: relative;
+            width: 44px; height: 44px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            color: rgba(255,255,255,0.3);
+            font-size: 18px;
+            transition: all 0.2s;
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+        .nav-item:hover {
+            background: rgba(255,255,255,0.07);
+            color: rgba(255,255,255,0.7);
+        }
+        .nav-item.active {
+            background: linear-gradient(135deg, rgba(79,70,229,0.35), rgba(124,58,237,0.25));
+            color: white;
+            border: 1px solid rgba(99,102,241,0.35);
+            box-shadow: 0 2px 12px rgba(79,70,229,0.25);
+        }
+
+        /* Tooltip */
+        .nav-item::after {
+            content: attr(data-tip);
+            position: absolute;
+            left: calc(100% + 12px);
+            top: 50%; transform: translateY(-50%);
+            background: #1e1b3a;
+            color: white;
+            font-size: 12px;
+            font-weight: 500;
+            padding: 6px 10px;
+            border-radius: 7px;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            border: 1px solid rgba(255,255,255,0.1);
+            font-family: 'DM Sans', sans-serif;
+        }
+        .nav-item:hover::after { opacity: 1; }
+
+        .nav-pip {
+            position: absolute;
+            top: 8px; right: 8px;
+            width: 7px; height: 7px;
+            background: var(--red);
+            border-radius: 50%;
+            border: 1.5px solid var(--sidebar-bg);
+        }
+
+        .sidebar-footer {
+            padding: 16px 0 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .sidebar-avatar {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--indigo), var(--violet));
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: 700; font-size: 13px;
+            cursor: pointer;
+            border: 2px solid rgba(255,255,255,0.15);
+            transition: border-color 0.2s;
+        }
+        .sidebar-avatar:hover { border-color: rgba(255,255,255,0.4); }
+        .sidebar-logout {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            background: none; border: none;
+            color: rgba(255,255,255,0.25);
+            font-size: 16px; cursor: pointer;
+            transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .sidebar-logout:hover { color: #fca5a5; background: rgba(220,38,38,0.12); }
+
+        /* ══════════════════════════════════════
+           MAIN LAYOUT
+        ══════════════════════════════════════ */
+        .main {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── HERO HEADER ── */
+        .hero {
+            background: linear-gradient(135deg, #0f0e1a 0%, #1e1b4b 55%, #2d1b69 100%);
+            padding: 32px 40px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%23ffffff' fill-opacity='0.025'%3E%3Ccircle cx='30' cy='30' r='1.5'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        .hero-orb-1 {
+            position: absolute; top: -60px; right: 80px;
+            width: 280px; height: 280px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(124,58,237,0.3), transparent 70%);
+            pointer-events: none;
+        }
+        .hero-orb-2 {
+            position: absolute; bottom: -40px; right: 320px;
+            width: 200px; height: 200px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(79,70,229,0.2), transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 28px;
+            position: relative; z-index: 1;
+        }
+        .hero-greeting {
+            font-family: 'DM Serif Display', serif;
+            font-size: 30px;
+            color: white;
+            margin-bottom: 4px;
+        }
+        .hero-sub {
+            font-size: 13px;
+            color: rgba(255,255,255,0.45);
+        }
+        .hero-right {
+            display: flex; align-items: center; gap: 10px;
+        }
+        .semester-pill {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: rgba(255,255,255,0.75);
+            padding: 7px 14px;
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .notif-btn {
+            position: relative;
+            width: 38px; height: 38px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.12);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 16px;
+            color: rgba(255,255,255,0.7);
+            transition: all 0.2s;
+        }
+        .notif-btn:hover { background: rgba(255,255,255,0.14); }
+        .notif-dot {
+            position: absolute; top: 7px; right: 7px;
+            width: 7px; height: 7px;
+            background: var(--red); border-radius: 50%;
+            border: 1.5px solid #1e1b4b;
+        }
+
+        /* Student profile strip */
+        .hero-profile {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            position: relative; z-index: 1;
+        }
+        .profile-avatar {
+            width: 60px; height: 60px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--indigo), var(--violet));
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'DM Serif Display', serif;
+            font-size: 22px; color: white;
+            flex-shrink: 0;
+            box-shadow: 0 6px 20px rgba(79,70,229,0.45);
+            border: 2px solid rgba(255,255,255,0.18);
+        }
+        .profile-info { flex: 1; }
+        .profile-name {
+            font-family: 'DM Serif Display', serif;
+            font-size: 22px; color: white;
+            margin-bottom: 6px;
+        }
+        .profile-tags {
+            display: flex; flex-wrap: wrap; gap: 8px;
+        }
+        .p-tag {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.6);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11.5px;
+        }
+        .profile-actions {
+            display: flex; gap: 8px;
+        }
+        .btn-glass {
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.18);
+            border-radius: 9px; color: white;
+            font-size: 13px; font-weight: 500;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .btn-glass:hover { background: rgba(255,255,255,0.18); }
+        .btn-glass-solid {
+            padding: 8px 16px;
+            background: white; border: none;
+            border-radius: 9px;
+            color: var(--indigo);
+            font-size: 13px; font-weight: 600;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .btn-glass-solid:hover { background: #eef0ff; }
+
+        /* Stat strip sits at the bottom of hero, overlapping into content */
+        .stat-strip {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0;
+            margin: 28px -40px 0;
+            position: relative; z-index: 2;
+            border-top: 1px solid rgba(255,255,255,0.07);
+        }
+        .stat-cell {
+            padding: 20px 28px;
+            border-right: 1px solid rgba(255,255,255,0.07);
+            cursor: default;
+            transition: background 0.2s;
+        }
+        .stat-cell:last-child { border-right: none; }
+        .stat-cell:hover { background: rgba(255,255,255,0.03); }
+        .sc-label {
+            font-size: 11px; font-weight: 600;
+            letter-spacing: 0.8px; text-transform: uppercase;
+            color: rgba(255,255,255,0.3);
+            margin-bottom: 8px;
+        }
+        .sc-value {
+            font-family: 'DM Serif Display', serif;
+            font-size: 28px; color: white;
+            line-height: 1; margin-bottom: 4px;
+        }
+        .sc-meta {
+            font-size: 12px;
+            color: rgba(255,255,255,0.4);
+            display: flex; align-items: center; gap: 6px;
+        }
+        .sc-badge {
+            font-size: 10px; font-weight: 700;
+            padding: 2px 6px; border-radius: 4px;
+        }
+        .sc-up   { background: rgba(5,150,105,0.25);  color: #6ee7b7; }
+        .sc-down { background: rgba(220,38,38,0.25);  color: #fca5a5; }
+        .sc-neu  { background: rgba(148,163,184,0.2); color: #94a3b8; }
+
+        /* ══════════════════════════════════════
+           PAGE CONTENT
+        ══════════════════════════════════════ */
+        .page-content {
+            padding: 28px 40px 40px;
+            flex: 1;
+        }
+
+        /* Section title */
+        .section-head {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .section-title {
+            font-size: 13px; font-weight: 700;
+            letter-spacing: 0.6px; text-transform: uppercase;
+            color: var(--text-muted);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .section-title::before {
+            content: '';
+            display: inline-block;
+            width: 3px; height: 14px;
+            background: linear-gradient(180deg, var(--indigo), var(--violet));
+            border-radius: 2px;
+        }
+        .section-link {
+            font-size: 13px; color: var(--indigo);
+            text-decoration: none; font-weight: 500;
+        }
+        .section-link:hover { text-decoration: underline; }
+
+        /* Layout grids */
+        .layout-a {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 22px;
+            margin-bottom: 22px;
+        }
+        .layout-b {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 22px;
+            margin-bottom: 22px;
+        }
+
+        /* ── CARD BASE ── */
+        .card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            overflow: hidden;
+            transition: box-shadow 0.25s;
+        }
+        .card:hover { box-shadow: 0 6px 24px rgba(15,23,42,0.08); }
+
+        .card-head {
+            padding: 18px 22px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--surface-3);
+        }
+        .card-title {
+            font-size: 14px; font-weight: 600;
+            color: var(--text-primary);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .card-title-icon {
+            width: 28px; height: 28px;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px;
+        }
+        .card-link {
+            font-size: 12px; color: var(--indigo);
+            text-decoration: none; font-weight: 600;
+            padding: 5px 10px; border-radius: 6px;
+            background: var(--indigo-pale);
+            transition: background 0.2s;
+        }
+        .card-link:hover { background: rgba(79,70,229,0.18); }
+        .card-body { padding: 18px 22px; }
+
+        /* ── SCHEDULE TABLE ── */
+        .sched-table { width: 100%; border-collapse: collapse; }
+        .sched-table th {
+            text-align: left; padding: 0 8px 10px 0;
+            font-size: 10.5px; font-weight: 700;
+            letter-spacing: 0.7px; text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 2px solid var(--surface-3);
+        }
+        .sched-table th:first-child { padding-left: 0; }
+        .sched-table td {
+            padding: 12px 8px 12px 0;
+            font-size: 13px;
+            border-bottom: 1px solid var(--surface-3);
+            vertical-align: middle;
+        }
+        .sched-table tr:last-child td { border-bottom: none; }
+
+        .subj-block .code { font-weight: 700; font-size: 13px; color: var(--text-primary); }
+        .subj-block .name { font-size: 11.5px; color: var(--text-muted); margin-top: 1px; }
+
+        .day-tag {
+            display: inline-flex; align-items: center;
+            padding: 3px 8px; border-radius: 5px;
+            font-size: 11px; font-weight: 700; letter-spacing: 0.3px;
+        }
+        .d-mwf { background: #dbeafe; color: #1d4ed8; }
+        .d-tth { background: #fce7f3; color: #be185d; }
+        .d-sat { background: #fef3c7; color: #92400e; }
+
+        .units-tag {
+            background: var(--indigo-pale);
+            color: var(--indigo);
+            padding: 3px 8px; border-radius: 5px;
+            font-size: 11.5px; font-weight: 700;
+        }
+        .time-text { font-size: 12px; color: var(--text-secondary); }
+        .room-text { font-size: 12px; color: var(--text-muted); }
+
+        /* ── GWA CARD ── */
+        .gwa-card-body {
+            padding: 24px 22px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .gwa-ring-wrap {
+            position: relative;
+            width: 120px; height: 120px;
+            margin-bottom: 18px;
+        }
+        .gwa-ring-wrap svg { transform: rotate(-90deg); }
+        .gwa-ring-bg { fill: none; stroke: var(--surface-3); stroke-width: 8; }
+        .gwa-ring-fill {
+            fill: none;
+            stroke: url(#gwa-grad);
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-dasharray: 283;
+            stroke-dashoffset: 51; /* 283 * (1 - 0.82) */
+            transition: stroke-dashoffset 1s ease;
+        }
+        .gwa-ring-text {
+            position: absolute; inset: 0;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+        }
+        .gwa-big {
+            font-family: 'DM Serif Display', serif;
+            font-size: 30px; line-height: 1;
+            background: linear-gradient(135deg, var(--indigo), var(--violet));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .gwa-sub { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+
+        .gwa-label { font-size: 13px; color: var(--text-secondary); margin-bottom: 14px; }
+        .honor-chip {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: linear-gradient(135deg, var(--indigo-pale), rgba(124,58,237,0.08));
+            border: 1px solid rgba(79,70,229,0.2);
+            color: var(--indigo); padding: 7px 14px;
+            border-radius: 100px; font-size: 12px; font-weight: 600;
+        }
+        .gwa-breakdown {
+            width: 100%; margin-top: 18px;
+            border-top: 1px solid var(--surface-3); padding-top: 16px;
+        }
+        .gwa-row {
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 10px;
+        }
+        .gwa-row:last-child { margin-bottom: 0; }
+        .gwa-row-label { font-size: 12px; color: var(--text-secondary); width: 80px; flex-shrink: 0; }
+        .gwa-mini-bar { flex: 1; height: 5px; background: var(--surface-3); border-radius: 3px; overflow: hidden; }
+        .gwa-mini-fill { height: 100%; border-radius: 3px; }
+        .gwa-row-val { font-size: 12px; font-weight: 700; min-width: 30px; text-align: right; }
+
+        /* ── GRADES ── */
+        .grade-item {
+            display: flex; align-items: center; gap: 14px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--surface-3);
+            transition: background 0.15s;
+        }
+        .grade-item:last-child { border-bottom: none; }
+        .grade-num {
+            width: 32px; height: 32px; border-radius: 9px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 12px;
+            flex-shrink: 0;
+        }
+        .grade-info { flex: 1; min-width: 0; }
+        .grade-code { font-weight: 700; font-size: 13px; }
+        .grade-name { font-size: 11.5px; color: var(--text-muted); margin-top: 1px; }
+        .grade-bar-wrap { width: 80px; height: 5px; background: var(--surface-3); border-radius: 3px; overflow: hidden; }
+        .grade-bar { height: 100%; border-radius: 3px; }
+        .grade-val { font-weight: 800; font-size: 15px; min-width: 36px; text-align: right; }
+        .g-status {
+            font-size: 10.5px; font-weight: 700;
+            padding: 3px 7px; border-radius: 5px;
+            min-width: 48px; text-align: center;
+        }
+        .gs-pass    { background: var(--green-light); color: var(--green); }
+        .gs-warn    { background: var(--amber-light); color: var(--amber); }
+        .gs-pending { background: var(--surface-3); color: var(--text-muted); }
+
+        /* ── ANNOUNCEMENTS ── */
+        .ann-list { display: flex; flex-direction: column; }
+        .ann-item {
+            display: flex; gap: 14px;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--surface-3);
+            transition: background 0.15s;
+            cursor: pointer;
+        }
+        .ann-item:last-child { border-bottom: none; }
+        .ann-dot-wrap {
+            display: flex; flex-direction: column;
+            align-items: center; padding-top: 4px;
+        }
+        .ann-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .ann-line {
+            width: 1px; flex: 1;
+            background: var(--surface-3);
+            margin-top: 4px;
+        }
+        .ann-item:last-child .ann-line { display: none; }
+        .ann-content { flex: 1; }
+        .ann-tag {
+            display: inline-block;
+            font-size: 10px; font-weight: 700;
+            letter-spacing: 0.5px; text-transform: uppercase;
+            padding: 2px 7px; border-radius: 4px;
+            margin-bottom: 4px;
+        }
+        .ann-title { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 3px; }
+        .ann-desc  { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+        .ann-time  { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+        .t-red    { background: var(--red-light);   color: var(--red);   }
+        .t-blue   { background: var(--blue-light);  color: var(--blue);  }
+        .t-green  { background: var(--green-light); color: var(--green); }
+        .t-amber  { background: var(--amber-light); color: var(--amber); }
+        .d-red    { background: var(--red);   }
+        .d-blue   { background: var(--blue);  }
+        .d-green  { background: var(--green); }
+        .d-amber  { background: var(--amber); }
+
+        /* ── QUICK LINKS ── */
+        .ql-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        .ql-item {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 8px;
+            padding: 16px 10px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .ql-item:hover {
+            background: white;
+            border-color: var(--indigo-light);
+            box-shadow: 0 2px 14px rgba(79,70,229,0.1);
+            transform: translateY(-2px);
+        }
+        .ql-icon {
+            width: 38px; height: 38px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px;
+        }
+        .ql-name { font-size: 12px; font-weight: 600; color: var(--text-primary); text-align: center; }
+        .ql-sub  { font-size: 10.5px; color: var(--text-muted); text-align: center; }
+
+        /* ══════════════════════════════════════
+           RESPONSIVE
+        ══════════════════════════════════════ */
+        @media (max-width: 1200px) {
+            .layout-a { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 1024px) {
+            .layout-b { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            :root { --sidebar-w: 0px; }
+            .sidebar { display: none; }
+            .hero { padding: 24px 20px 0; }
+            .stat-strip { margin: 24px -20px 0; grid-template-columns: repeat(2, 1fr); }
+            .page-content { padding: 20px; }
+            .hero-profile { flex-wrap: wrap; }
+        }
+
+        /* ══════════════════════════════════════
+           ANIMATIONS
+        ══════════════════════════════════════ */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .hero-profile  { animation: fadeUp 0.5s ease 0.05s both; }
+        .stat-strip    { animation: fadeUp 0.5s ease 0.15s both; }
+        .layout-a      { animation: fadeUp 0.5s ease 0.25s both; }
+        .layout-b      { animation: fadeUp 0.5s ease 0.35s both; }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+    <!-- ══════════════════════════════════════
+         SIDEBAR
+    ══════════════════════════════════════ -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">DB</div>
+
+        <nav class="sidebar-nav">
+            <a class="nav-item active" href="#" data-tip="Dashboard">🏠</a>
+            <a class="nav-item" href="#" data-tip="Enrollment">📋</a>
+            <a class="nav-item" href="#" data-tip="My Subjects">📚</a>
+            <a class="nav-item" href="#" data-tip="Grades">
+                📊
+                <span class="nav-pip"></span>
+            </a>
+
+            <div class="nav-divider"></div>
+
+            <a class="nav-item" href="#" data-tip="Schedule">📅</a>
+            <a class="nav-item" href="#" data-tip="Records">📜</a>
+            <a class="nav-item" href="#" data-tip="Curriculum">🏫</a>
+
+            <div class="nav-divider"></div>
+
+            <a class="nav-item" href="#" data-tip="Payments">
+                💳
+                <span class="nav-pip"></span>
+            </a>
+            <a class="nav-item" href="#" data-tip="Assessment">📄</a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="sidebar-avatar" title="Profile">JA</div>
+            <a class="nav-item" href="#" data-tip="Settings" style="width:36px;height:36px;">⚙️</a>
+            <button class="sidebar-logout" onclick="logout()" title="Logout">⏻</button>
+        </div>
+    </aside>
+
+    <!-- ══════════════════════════════════════
+         MAIN
+    ══════════════════════════════════════ -->
+    <main class="main">
+
+        <!-- HERO -->
+        <div class="hero">
+            <div class="hero-orb-1"></div>
+            <div class="hero-orb-2"></div>
+
+            <div class="hero-top">
+                <div>
+                    <div class="hero-greeting">Good morning, Jownie! 👋</div>
+                    <div class="hero-sub">Here's your academic overview for today</div>
+                </div>
+                <div class="hero-right">
+                    <span class="semester-pill">A.Y. 2025–2026 · 2nd Semester</span>
+                    <div class="notif-btn">🔔<span class="notif-dot"></span></div>
+                </div>
+            </div>
+
+            <!-- Student profile strip -->
+            <div class="hero-profile" id="studentBanner">
+                <div class="profile-avatar" id="dynInitials">JA</div>
+                <div class="profile-info">
+                    <div class="profile-name" id="dynName">Jownie Ann Malate</div>
+                    <div class="profile-tags">
+                        <span class="p-tag" id="dynNo">📌 2024-12345</span>
+                        <span class="p-tag">🎓 College of Information Technology</span>
+                        <span class="p-tag">BSIT · 3rd Year</span>
+                        <span class="p-tag" id="dynEmail">✉️ jownie@dbtc.edu.ph</span>
+                    </div>
+                </div>
+                <div class="profile-actions">
+                    <button class="btn-glass" onclick="window.location.href='Enrollment.html'">📋 Enroll</button>
+                    <button class="btn-glass-solid" onclick="window.location.href='LogIn.html'">🚪 Logout</button>
+                </div>
+            </div>
+
+            <!-- Stat strip -->
+            <div class="stat-strip">
+                <div class="stat-cell">
+                    <div class="sc-label">Enrolled Subjects</div>
+                    <div class="sc-value">7</div>
+                    <div class="sc-meta"><span class="sc-badge sc-up">+2</span> this semester</div>
+                </div>
+                <div class="stat-cell">
+                    <div class="sc-label">Total Units</div>
+                    <div class="sc-value">21</div>
+                    <div class="sc-meta"><span class="sc-badge sc-neu">—</span> max load</div>
+                </div>
+                <div class="stat-cell">
+                    <div class="sc-label">Current GWA</div>
+                    <div class="sc-value">1.62</div>
+                    <div class="sc-meta"><span class="sc-badge sc-up">↑ 0.2</span> vs last sem</div>
+                </div>
+                <div class="stat-cell">
+                    <div class="sc-label">Balance Due</div>
+                    <div class="sc-value">₱4,200</div>
+                    <div class="sc-meta"><span class="sc-badge sc-down">Due</span> Feb 28</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE CONTENT -->
+        <div class="page-content">
+
+            <!-- Schedule + GWA -->
+            <div class="layout-a">
+
+                <!-- Schedule -->
+                <div>
+                    <div class="section-head">
+                        <span class="section-title">Class Schedule</span>
+                        <a href="#" class="section-link">Full Schedule →</a>
+                    </div>
+                    <div class="card">
+                        <div class="card-body" style="padding-top:14px; padding-bottom:14px;">
+                            <table class="sched-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width:40%">Subject</th>
+                                        <th>Day</th>
+                                        <th>Time</th>
+                                        <th>Room</th>
+                                        <th>Units</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><div class="subj-block"><div class="code">CS 201</div><div class="name">Data Structures & Algorithms</div></div></td>
+                                        <td><span class="day-tag d-mwf">MWF</span></td>
+                                        <td><span class="time-text">7:30–9:00</span></td>
+                                        <td><span class="room-text">Lab 3</span></td>
+                                        <td><span class="units-tag">3</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><div class="subj-block"><div class="code">CS 202</div><div class="name">Object-Oriented Programming</div></div></td>
+                                        <td><span class="day-tag d-tth">TTH</span></td>
+                                        <td><span class="time-text">9:00–10:30</span></td>
+                                        <td><span class="room-text">Rm 204</span></td>
+                                        <td><span class="units-tag">3</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><div class="subj-block"><div class="code">MATH 201</div><div class="name">Discrete Mathematics</div></div></td>
+                                        <td><span class="day-tag d-mwf">MWF</span></td>
+                                        <td><span class="time-text">10:30–12:00</span></td>
+                                        <td><span class="room-text">Rm 110</span></td>
+                                        <td><span class="units-tag">3</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><div class="subj-block"><div class="code">CS 203</div><div class="name">Computer Organization</div></div></td>
+                                        <td><span class="day-tag d-tth">TTH</span></td>
+                                        <td><span class="time-text">1:00–2:30</span></td>
+                                        <td><span class="room-text">Rm 302</span></td>
+                                        <td><span class="units-tag">3</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><div class="subj-block"><div class="code">ENG 201</div><div class="name">Technical Communication</div></div></td>
+                                        <td><span class="day-tag d-sat">SAT</span></td>
+                                        <td><span class="time-text">8:00–11:00</span></td>
+                                        <td><span class="room-text">Rm 105</span></td>
+                                        <td><span class="units-tag">3</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><div class="subj-block"><div class="code">NSTP 101</div><div class="name">National Service Training</div></div></td>
+                                        <td><span class="day-tag d-sat">SAT</span></td>
+                                        <td><span class="time-text">1:00–4:00</span></td>
+                                        <td><span class="room-text">Gym</span></td>
+                                        <td><span class="units-tag">3</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><div class="subj-block"><div class="code">PE 201</div><div class="name">Physical Education 2</div></div></td>
+                                        <td><span class="day-tag d-tth">TTH</span></td>
+                                        <td><span class="time-text">4:00–5:30</span></td>
+                                        <td><span class="room-text">Court</span></td>
+                                        <td><span class="units-tag">3</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GWA -->
+                <div>
+                    <div class="section-head">
+                        <span class="section-title">GWA Overview</span>
+                    </div>
+                    <div class="card">
+                        <div class="gwa-card-body">
+                            <!-- SVG Ring -->
+                            <div class="gwa-ring-wrap">
+                                <svg width="120" height="120" viewBox="0 0 120 120">
+                                    <defs>
+                                        <linearGradient id="gwa-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" stop-color="#4f46e5"/>
+                                            <stop offset="100%" stop-color="#7c3aed"/>
+                                        </linearGradient>
+                                    </defs>
+                                    <circle class="gwa-ring-bg" cx="60" cy="60" r="45"/>
+                                    <circle class="gwa-ring-fill" cx="60" cy="60" r="45"/>
+                                </svg>
+                                <div class="gwa-ring-text">
+                                    <span class="gwa-big">1.62</span>
+                                    <span class="gwa-sub">GWA</span>
+                                </div>
+                            </div>
+                            <div class="gwa-label">General Weighted Average</div>
+                            <div class="honor-chip">🌟 Dean's List Candidate</div>
+
+                            <div class="gwa-breakdown">
+                                <div class="gwa-row">
+                                    <span class="gwa-row-label">CS Subjects</span>
+                                    <div class="gwa-mini-bar"><div class="gwa-mini-fill" style="width:92%;background:linear-gradient(90deg,#4f46e5,#7c3aed);"></div></div>
+                                    <span class="gwa-row-val" style="color:#4f46e5;">1.41</span>
+                                </div>
+                                <div class="gwa-row">
+                                    <span class="gwa-row-label">Math</span>
+                                    <div class="gwa-mini-bar"><div class="gwa-mini-fill" style="width:75%;background:linear-gradient(90deg,#d97706,#f59e0b);"></div></div>
+                                    <span class="gwa-row-val" style="color:#d97706;">1.75</span>
+                                </div>
+                                <div class="gwa-row">
+                                    <span class="gwa-row-label">GE</span>
+                                    <div class="gwa-mini-bar"><div class="gwa-mini-fill" style="width:60%;background:linear-gradient(90deg,#dc2626,#ef4444);"></div></div>
+                                    <span class="gwa-row-val" style="color:#dc2626;">2.25</span>
+                                </div>
+                                <div class="gwa-row">
+                                    <span class="gwa-row-label">PE / NSTP</span>
+                                    <div class="gwa-mini-bar"><div class="gwa-mini-fill" style="width:50%;background:#cbd5e0;"></div></div>
+                                    <span class="gwa-row-val" style="color:#94a3b8;">—</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grades + Announcements + Quick Links -->
+            <div class="layout-b">
+
+                <!-- Grades -->
+                <div>
+                    <div class="section-head">
+                        <span class="section-title">Latest Grades</span>
+                        <a href="#" class="section-link">View All →</a>
+                    </div>
+                    <div class="card">
+                        <div class="card-body" style="padding-top:10px; padding-bottom:10px;">
+
+                            <div class="grade-item">
+                                <div class="grade-num" style="background:#ede9fe;color:#4f46e5;">1.25</div>
+                                <div class="grade-info"><div class="grade-code">CS 201</div><div class="grade-name">Data Structures & Algorithms</div></div>
+                                <div class="grade-bar-wrap"><div class="grade-bar" style="width:95%;background:linear-gradient(90deg,#4f46e5,#7c3aed);"></div></div>
+                                <span class="g-status gs-pass">Pass</span>
+                            </div>
+                            <div class="grade-item">
+                                <div class="grade-num" style="background:#d1fae5;color:#059669;">1.50</div>
+                                <div class="grade-info"><div class="grade-code">CS 202</div><div class="grade-name">Object-Oriented Programming</div></div>
+                                <div class="grade-bar-wrap"><div class="grade-bar" style="width:88%;background:linear-gradient(90deg,#059669,#10b981);"></div></div>
+                                <span class="g-status gs-pass">Pass</span>
+                            </div>
+                            <div class="grade-item">
+                                <div class="grade-num" style="background:#fef3c7;color:#d97706;">1.75</div>
+                                <div class="grade-info"><div class="grade-code">MATH 201</div><div class="grade-name">Discrete Mathematics</div></div>
+                                <div class="grade-bar-wrap"><div class="grade-bar" style="width:75%;background:linear-gradient(90deg,#d97706,#f59e0b);"></div></div>
+                                <span class="g-status gs-pass">Pass</span>
+                            </div>
+                            <div class="grade-item">
+                                <div class="grade-num" style="background:#dbeafe;color:#2563eb;">1.50</div>
+                                <div class="grade-info"><div class="grade-code">CS 203</div><div class="grade-name">Computer Organization</div></div>
+                                <div class="grade-bar-wrap"><div class="grade-bar" style="width:90%;background:linear-gradient(90deg,#2563eb,#3b82f6);"></div></div>
+                                <span class="g-status gs-pass">Pass</span>
+                            </div>
+                            <div class="grade-item">
+                                <div class="grade-num" style="background:#fee2e2;color:#dc2626;">2.25</div>
+                                <div class="grade-info"><div class="grade-code">ENG 201</div><div class="grade-name">Technical Communication</div></div>
+                                <div class="grade-bar-wrap"><div class="grade-bar" style="width:60%;background:linear-gradient(90deg,#dc2626,#ef4444);"></div></div>
+                                <span class="g-status gs-warn">Watch</span>
+                            </div>
+                            <div class="grade-item">
+                                <div class="grade-num" style="background:var(--surface-3);color:#94a3b8;">—</div>
+                                <div class="grade-info"><div class="grade-code">NSTP 101</div><div class="grade-name">National Service Training</div></div>
+                                <div class="grade-bar-wrap"><div class="grade-bar" style="width:50%;background:#cbd5e0;"></div></div>
+                                <span class="g-status gs-pending">Pending</span>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right column -->
+                <div style="display:flex;flex-direction:column;gap:22px;">
+
+                    <!-- Announcements -->
+                    <div>
+                        <div class="section-head">
+                            <span class="section-title">Announcements</span>
+                            <a href="#" class="section-link">All →</a>
+                        </div>
+                        <div class="card">
+                            <div class="card-body" style="padding-top:8px;padding-bottom:8px;">
+                                <div class="ann-list">
+                                    <div class="ann-item">
+                                        <div class="ann-dot-wrap"><div class="ann-dot d-red"></div><div class="ann-line"></div></div>
+                                        <div class="ann-content">
+                                            <span class="ann-tag t-red">Urgent</span>
+                                            <div class="ann-title">Enrollment Deadline Extended</div>
+                                            <div class="ann-desc">2nd semester enrollment extended until Feb 28. Late fees apply after Feb 21.</div>
+                                            <div class="ann-time">2 hours ago</div>
+                                        </div>
+                                    </div>
+                                    <div class="ann-item">
+                                        <div class="ann-dot-wrap"><div class="ann-dot d-blue"></div><div class="ann-line"></div></div>
+                                        <div class="ann-content">
+                                            <span class="ann-tag t-blue">Info</span>
+                                            <div class="ann-title">Midterm Exam Schedule Released</div>
+                                            <div class="ann-desc">Check the registrar's portal for your midterm examination schedule and room assignments.</div>
+                                            <div class="ann-time">Yesterday</div>
+                                        </div>
+                                    </div>
+                                    <div class="ann-item">
+                                        <div class="ann-dot-wrap"><div class="ann-dot d-green"></div><div class="ann-line"></div></div>
+                                        <div class="ann-content">
+                                            <span class="ann-tag t-green">Achievement</span>
+                                            <div class="ann-title">Dean's List — 1st Semester</div>
+                                            <div class="ann-desc">Congratulations to all students on the Dean's List! Recognition ceremony on Feb 20.</div>
+                                            <div class="ann-time">2 days ago</div>
+                                        </div>
+                                    </div>
+                                    <div class="ann-item">
+                                        <div class="ann-dot-wrap"><div class="ann-dot d-amber"></div><div class="ann-line"></div></div>
+                                        <div class="ann-content">
+                                            <span class="ann-tag t-amber">Finance</span>
+                                            <div class="ann-title">Payment Reminder</div>
+                                            <div class="ann-desc">Outstanding balance of ₱4,200. Settle before Feb 28 to avoid late charges.</div>
+                                            <div class="ann-time">3 days ago</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Links -->
+                    <div>
+                        <div class="section-head">
+                            <span class="section-title">Quick Links</span>
+                        </div>
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="ql-grid">
+                                    <a href="enrollment.html" class="ql-item">
+                                        <div class="ql-icon" style="background:#ede9fe;">🎓</div>
+                                        <div class="ql-name">Enroll Now</div>
+                                        <div class="ql-sub">2nd Sem</div>
+                                    </a>
+                                    <a href="#" class="ql-item">
+                                        <div class="ql-icon" style="background:#dbeafe;">📊</div>
+                                        <div class="ql-name">View Grades</div>
+                                        <div class="ql-sub">1st Sem</div>
+                                    </a>
+                                    <a href="#" class="ql-item">
+                                        <div class="ql-icon" style="background:#fce7f3;">💳</div>
+                                        <div class="ql-name">Pay Balance</div>
+                                        <div class="ql-sub">₱4,200</div>
+                                    </a>
+                                    <a href="#" class="ql-item">
+                                        <div class="ql-icon" style="background:#d1fae5;">📜</div>
+                                        <div class="ql-name">Request COE</div>
+                                        <div class="ql-sub">Certification</div>
+                                    </a>
+                                    <a href="#" class="ql-item">
+                                        <div class="ql-icon" style="background:#fef3c7;">📅</div>
+                                        <div class="ql-name">Schedule</div>
+                                        <div class="ql-sub">This Sem</div>
+                                    </a>
+                                    <a href="#" class="ql-item">
+                                        <div class="ql-icon" style="background:#e0e7ff;">📄</div>
+                                        <div class="ql-name">Transcript</div>
+                                        <div class="ql-sub">Request TOR</div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div><!-- /page-content -->
+    </main>
+
+    <script>
+        const API = 'http://localhost:5130/api';
+
+        function getToken() { return sessionStorage.getItem('jwt') || localStorage.getItem('jwt'); }
+
+        function logout() {
+            ['jwt','email','roles'].forEach(k => {
+                sessionStorage.removeItem(k);
+                localStorage.removeItem(k);
+            });
+            window.location.href = 'LogIn.html';
+        }
+
+        async function fetchStudentProfile() {
+            const token = getToken();
+            if (!token) return;
+
+            try {
+                const res = await fetch(`${API}/Auth/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) { if (res.status === 401) logout(); return; }
+
+                const user = await res.json();
+
+                const isStudent = user.roles.includes('Student');
+                if (!isStudent && (user.roles.includes('Admin') || user.roles.includes('Registrar') || user.roles.includes('Cashier'))) {
+                    window.location.href = 'RoleManagement.html';
+                    return;
+                }
+
+                const profile = user.profile || {};
+                const name = profile.firstName && profile.lastName
+                    ? `${profile.firstName} ${profile.lastName}`
+                    : (profile.firstName || user.email);
+
+                document.getElementById('dynName').textContent = name;
+                document.getElementById('dynEmail').textContent = `✉️ ${user.email}`;
+                document.getElementById('dynNo').textContent = `📌 ${profile.studentNumber || 'TBD'}`;
+
+                const initials = (profile.firstName ? profile.firstName[0] : user.email[0]).toUpperCase();
+                document.getElementById('dynInitials').textContent = initials;
+
+            } catch (err) {
+                console.error('Failed to fetch profile', err);
+            }
+        }
+
+        fetchStudentProfile();
+    </script>
+</body>
+</html>
