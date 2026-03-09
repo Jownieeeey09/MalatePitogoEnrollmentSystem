@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Role Management — DBTC Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --indigo: #4f46e5;
+            --indigo-dark: #3730a3;
+            --violet: #7c3aed;
+            --indigo-light: #818cf8;
+            --indigo-pale: rgba(79,70,229,0.12);
+            --surface: #ffffff;
+            --surface-2: #f8fafc;
+            --surface-3: #f1f5f9;
+            --border: #e2e8f0;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --green: #059669;
+            --green-light: #d1fae5;
+            --amber: #d97706;
+            --amber-light: #fef3c7;
+            --red: #dc2626;
+            --red-light: #fee2e2;
+            --blue: #2563eb;
+            --blue-light: #dbeafe;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--surface-2);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: 260px;
+            background: #0f0e1a;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        .sidebar-brand {
+            padding: 28px 24px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .brand-row { display: flex; align-items: center; gap: 12px; }
+        .brand-icon {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, var(--indigo), var(--violet));
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'DM Serif Display', serif;
+            font-size: 16px; color: white; font-weight: 700; flex-shrink: 0;
+        }
+        .brand-text .name { font-weight: 700; color: white; font-size: 15px; }
+        .brand-text .sub  { color: rgba(255,255,255,0.35); font-size: 11px; }
+
+        .sidebar-nav { padding: 20px 14px; flex: 1; }
+        .nav-label {
+            font-size: 10px; font-weight: 600; letter-spacing: 1.2px;
+            color: rgba(255,255,255,0.25); text-transform: uppercase;
+            padding: 0 10px; margin: 18px 0 8px;
+        }
+        .nav-label:first-child { margin-top: 0; }
+        .nav-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 12px; border-radius: 10px;
+            cursor: pointer; color: rgba(255,255,255,0.45);
+            font-size: 14px; font-weight: 500; transition: all 0.2s;
+            margin-bottom: 2px; text-decoration: none;
+        }
+        .nav-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.8); }
+        .nav-item.active {
+            background: linear-gradient(135deg, rgba(79,70,229,0.3), rgba(124,58,237,0.2));
+            color: white; border: 1px solid rgba(99,102,241,0.3);
+        }
+        .nav-icon { font-size: 16px; width: 20px; text-align: center; opacity: 0.6; }
+        .nav-item.active .nav-icon { opacity: 1; }
+
+        .sidebar-footer {
+            padding: 16px 14px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+        .admin-card {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 12px; border-radius: 10px;
+            background: rgba(255,255,255,0.05);
+        }
+        .avatar {
+            width: 36px; height: 36px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--indigo), var(--violet));
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: 700; font-size: 13px; flex-shrink: 0;
+        }
+        .admin-info .aname { color: white; font-size: 13px; font-weight: 600; }
+        .admin-info .arole { color: rgba(255,255,255,0.35); font-size: 11px; }
+        .logout-btn {
+            margin-left: auto; background: none; border: none;
+            cursor: pointer; color: rgba(255,255,255,0.3);
+            font-size: 16px; padding: 4px; transition: color 0.2s;
+        }
+        .logout-btn:hover { color: #fca5a5; }
+
+        /* ── MAIN ── */
+        .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+
+        .topbar {
+            background: white; border-bottom: 1px solid var(--border);
+            padding: 18px 32px;
+            display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 10;
+        }
+        .topbar-left h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 22px; color: var(--text-primary);
+        }
+        .topbar-left p { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+        .topbar-right { display: flex; align-items: center; gap: 10px; }
+
+        .btn {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 9px 18px; border-radius: 10px;
+            font-size: 13px; font-weight: 600;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer; border: none; transition: all 0.2s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--indigo), var(--violet));
+            color: white; box-shadow: 0 2px 12px rgba(79,70,229,0.35);
+        }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 18px rgba(79,70,229,0.45); }
+        .btn-secondary {
+            background: var(--surface-3); color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+        .btn-secondary:hover { background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .btn-danger {
+            background: var(--red-light); color: var(--red);
+            border: 1px solid rgba(220,38,38,0.2);
+        }
+        .btn-danger:hover { background: #fecaca; }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
+
+        .page-content { padding: 32px; flex: 1; }
+
+        /* ── STATS ROW ── */
+        .stats-row {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 16px; margin-bottom: 28px;
+        }
+        .stat-card {
+            background: white; border: 1px solid var(--border);
+            border-radius: 16px; padding: 20px 22px;
+            animation: fadeSlideIn 0.5s ease both;
+        }
+        .stat-card:nth-child(1) { animation-delay: 0.05s; }
+        .stat-card:nth-child(2) { animation-delay: 0.10s; }
+        .stat-card:nth-child(3) { animation-delay: 0.15s; }
+        .stat-card:nth-child(4) { animation-delay: 0.20s; }
+        .stat-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.07); transform: translateY(-2px); }
+        .stat-header { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+        .stat-icon {
+            width: 42px; height: 42px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; font-size: 20px;
+        }
+        .stat-meta { flex: 1; }
+        .stat-value { font-family: 'DM Serif Display', serif; font-size: 32px; line-height: 1; }
+        .stat-label { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+
+        /* ── GRID LAYOUT ── */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+        .grid-3-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 22px; }
+
+        /* ── CARD ── */
+        .card {
+            background: white; border: 1px solid var(--border);
+            border-radius: 16px; overflow: hidden;
+            animation: fadeSlideIn 0.5s ease both;
+        }
+        .card-header {
+            padding: 18px 24px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .card-title { font-size: 15px; font-weight: 600; }
+        .card-body { padding: 20px 24px; }
+
+        /* ── ROLE CHIPS ── */
+        .roles-grid {
+            display: flex; flex-wrap: wrap; gap: 10px;
+            padding: 20px 24px;
+        }
+        .role-chip {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--indigo-pale);
+            border: 1px solid rgba(79,70,229,0.2);
+            color: var(--indigo);
+            padding: 8px 14px; border-radius: 100px;
+            font-size: 13px; font-weight: 600;
+            transition: all 0.2s;
+        }
+        .role-chip:hover { background: rgba(79,70,229,0.18); }
+        .role-chip-del {
+            background: none; border: none; cursor: pointer;
+            color: var(--indigo); opacity: 0.5; font-size: 15px;
+            display: flex; align-items: center; padding: 0; margin: 0;
+            transition: opacity 0.15s;
+        }
+        .role-chip-del:hover { opacity: 1; color: var(--red); }
+
+        /* ── USER TABLE ── */
+        .user-table { width: 100%; border-collapse: collapse; }
+        .user-table th {
+            text-align: left; font-size: 11px; font-weight: 600;
+            letter-spacing: 0.6px; text-transform: uppercase;
+            color: var(--text-muted); padding: 0 16px 12px;
+            border-bottom: 1px solid var(--border);
+        }
+        .user-table td {
+            padding: 13px 16px; font-size: 13px;
+            border-bottom: 1px solid var(--surface-3);
+            vertical-align: middle;
+        }
+        .user-table tr:last-child td { border-bottom: none; }
+        .user-table tr:hover td { background: var(--surface-2); }
+
+        .user-avatar {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--indigo), var(--violet));
+            display: inline-flex; align-items: center; justify-content: center;
+            color: white; font-weight: 700; font-size: 12px;
+            flex-shrink: 0;
+        }
+        .user-cell { display: flex; align-items: center; gap: 10px; }
+        .user-email { font-weight: 600; color: var(--text-primary); font-size: 13px; }
+        .user-id { font-size: 11px; color: var(--text-muted); }
+
+        .role-tag {
+            display: inline-flex; align-items: center;
+            padding: 3px 9px; border-radius: 100px;
+            font-size: 11px; font-weight: 600; margin: 2px 2px;
+        }
+        .role-admin    { background: #ede9fe; color: #5b21b6; }
+        .role-student  { background: var(--blue-light); color: #1d4ed8; }
+        .role-registrar{ background: var(--green-light); color: var(--green); }
+        .role-cashier  { background: var(--amber-light); color: var(--amber); }
+        .role-instructor{ background: #fce7f3; color: #be185d; }
+        .role-default  { background: var(--surface-3); color: var(--text-muted); }
+
+        .lock-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: 11px; padding: 3px 8px; border-radius: 5px;
+        }
+        .lock-active { background: var(--green-light); color: var(--green); }
+        .lock-locked { background: var(--red-light); color: var(--red); }
+
+        /* ── SEARCH & FILTER BAR ── */
+        .toolbar {
+            display: flex; align-items: center; gap: 12px;
+            padding: 16px 24px; border-bottom: 1px solid var(--border);
+        }
+        .search-wrap { position: relative; flex: 1; max-width: 320px; }
+        .search-icon {
+            position: absolute; left: 12px; top: 50%;
+            transform: translateY(-50%); font-size: 14px; opacity: 0.4;
+            pointer-events: none;
+        }
+        .search-input {
+            width: 100%; padding: 9px 12px 9px 36px;
+            border: 1px solid var(--border); border-radius: 10px;
+            background: var(--surface-3); font-size: 13px;
+            font-family: 'DM Sans', sans-serif;
+            color: var(--text-primary); transition: all 0.2s;
+        }
+        .search-input:focus {
+            outline: none; border-color: var(--indigo-light);
+            background: white; box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+        }
+        .filter-select {
+            padding: 9px 12px; border: 1px solid var(--border);
+            border-radius: 10px; background: var(--surface-3);
+            font-size: 13px; font-family: 'DM Sans', sans-serif;
+            color: var(--text-secondary); cursor: pointer;
+        }
+        .filter-select:focus { outline: none; border-color: var(--indigo-light); }
+
+        /* ── MODAL ── */
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.55);
+            backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 100; padding: 20px;
+            opacity: 0; pointer-events: none; transition: opacity 0.2s;
+        }
+        .modal-overlay.open { opacity: 1; pointer-events: all; }
+        .modal {
+            background: white; border-radius: 20px;
+            width: 100%; max-width: 480px;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.2);
+            transform: translateY(20px) scale(0.97);
+            transition: transform 0.25s cubic-bezier(0.16,1,0.3,1);
+        }
+        .modal-overlay.open .modal { transform: translateY(0) scale(1); }
+        .modal-header {
+            padding: 24px 28px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .modal-title { font-size: 17px; font-weight: 700; font-family: 'DM Serif Display', serif; }
+        .modal-close {
+            background: var(--surface-3); border: none;
+            width: 30px; height: 30px; border-radius: 8px;
+            cursor: pointer; font-size: 14px; transition: all 0.15s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .modal-close:hover { background: var(--red-light); color: var(--red); }
+        .modal-body { padding: 24px 28px; }
+        .modal-footer {
+            padding: 18px 28px;
+            border-top: 1px solid var(--border);
+            display: flex; justify-content: flex-end; gap: 10px;
+        }
+
+        .form-group { margin-bottom: 18px; }
+        .form-label {
+            display: block; margin-bottom: 7px;
+            font-size: 13px; font-weight: 600; color: var(--text-secondary);
+        }
+        .form-input, .form-select {
+            width: 100%; padding: 10px 14px;
+            border: 1px solid var(--border); border-radius: 10px;
+            font-size: 14px; font-family: 'DM Sans', sans-serif;
+            color: var(--text-primary); transition: all 0.2s;
+            background: var(--surface-2);
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none; border-color: var(--indigo-light);
+            background: white; box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+        }
+        .form-hint { font-size: 12px; color: var(--text-muted); margin-top: 5px; }
+
+        /* ── TOAST ── */
+        .toast-container {
+            position: fixed; bottom: 24px; right: 24px;
+            display: flex; flex-direction: column; gap: 8px;
+            z-index: 200;
+        }
+        .toast {
+            display: flex; align-items: center; gap: 12px;
+            padding: 14px 18px; border-radius: 12px;
+            font-size: 13px; font-weight: 500;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            animation: toastIn 0.3s ease both;
+            max-width: 340px; min-width: 240px;
+        }
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+        .toast-icon { font-size: 18px; flex-shrink: 0; }
+        .toast.success { background: white; border-left: 4px solid var(--green); }
+        .toast.error   { background: white; border-left: 4px solid var(--red); }
+        .toast.info    { background: white; border-left: 4px solid var(--indigo); }
+
+        /* ── EMPTY STATE ── */
+        .empty-state {
+            display: flex; flex-direction: column; align-items: center;
+            padding: 48px 24px; color: var(--text-muted); text-align: center;
+        }
+        .empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.4; }
+        .empty-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; color: var(--text-secondary); }
+        .empty-sub { font-size: 13px; }
+
+        /* ── LOADING SPINNER ── */
+        .spinner {
+            display: inline-block; width: 16px; height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white; border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── ANIMATIONS ── */
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 1100px) {
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
+            .grid-3-1 { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .page-content { padding: 20px; }
+            .topbar { padding: 14px 20px; }
+            .grid-2 { grid-template-columns: 1fr; }
+        }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+    <!-- ── SIDEBAR ── -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-row">
+                <div class="brand-icon">DB</div>
+                <div class="brand-text">
+                    <div class="name">DBTC Portal</div>
+                    <div class="sub">Admin Panel</div>
+                </div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-label">Admin</div>
+            <a href="Enrollment.html" class="nav-item">
+                <span class="nav-icon">🏠</span> Dashboard
+            </a>
+            <a href="#" class="nav-item">
+                <span class="nav-icon">👥</span> Users
+            </a>
+            <a href="RoleManagement.html" class="nav-item active">
+                <span class="nav-icon">🛡️</span> Role Management
+            </a>
+
+            <div class="nav-label">System</div>
+            <a href="#" class="nav-item">
+                <span class="nav-icon">📋</span> Enrollments
+            </a>
+            <a href="#" class="nav-item">
+                <span class="nav-icon">📚</span> Courses
+            </a>
+            <a href="#" class="nav-item">
+                <span class="nav-icon">👨‍🏫</span> Instructors
+            </a>
+
+            <div class="nav-label">Account</div>
+            <a href="#" class="nav-item">
+                <span class="nav-icon">⚙️</span> Settings
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="admin-card">
+                <div class="avatar" id="sidebarAvatar">AD</div>
+                <div class="admin-info">
+                    <div class="aname" id="sidebarName">Admin</div>
+                    <div class="arole">Administrator</div>
+                </div>
+                <button class="logout-btn" onclick="logout()" title="Logout">⏻</button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ── MAIN ── -->
+    <main class="main">
+        <header class="topbar">
+            <div class="topbar-left">
+                <h1>🛡️ Role Management</h1>
+                <p>Create roles and assign them to users</p>
+            </div>
+            <div class="topbar-right">
+                <button class="btn btn-secondary" onclick="openModal('seedModal')">⚡ Seed Defaults</button>
+                <button class="btn btn-primary" onclick="openModal('createRoleModal')">＋ New Role</button>
+            </div>
+        </header>
+
+        <div class="page-content">
+
+            <!-- Stat Cards -->
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon" style="background:#ede9fe;">🛡️</div>
+                        <div class="stat-meta">
+                            <div class="stat-value" id="statRoles">—</div>
+                            <div class="stat-label">Total Roles</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon" style="background:var(--blue-light);">👥</div>
+                        <div class="stat-meta">
+                            <div class="stat-value" id="statUsers">—</div>
+                            <div class="stat-label">Total Users</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon" style="background:var(--green-light);">✅</div>
+                        <div class="stat-meta">
+                            <div class="stat-value" id="statActive">—</div>
+                            <div class="stat-label">Active Users</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon" style="background:var(--red-light);">🔒</div>
+                        <div class="stat-meta">
+                            <div class="stat-value" id="statLocked">—</div>
+                            <div class="stat-label">Locked Users</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top row: Roles list + Assign -->
+            <div class="grid-2" style="margin-bottom:22px;">
+
+                <!-- Roles Panel -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">🏷️ Existing Roles</span>
+                        <button class="btn btn-secondary btn-sm" onclick="loadRoles()">↻ Refresh</button>
+                    </div>
+                    <div class="roles-grid" id="rolesGrid">
+                        <div class="empty-state"><div class="empty-icon">🛡️</div><div class="empty-title">Loading roles…</div></div>
+                    </div>
+                </div>
+
+                <!-- Quick Assign Panel -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">⚡ Quick Assign Role</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label">User</label>
+                            <select class="form-select" id="qaUserId">
+                                <option value="">— select user —</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Role to Assign</label>
+                            <select class="form-select" id="qaRole">
+                                <option value="">— select role —</option>
+                            </select>
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-secondary);cursor:pointer;">
+                                <input type="checkbox" id="qaReplace" style="accent-color:var(--indigo);">
+                                Replace existing roles
+                            </label>
+                        </div>
+                        <div style="display:flex;gap:10px;margin-top:18px;">
+                            <button class="btn btn-primary" style="flex:1;" onclick="quickAssign()">Assign Role</button>
+                            <button class="btn btn-danger btn-sm" onclick="quickRemove()">Remove</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User-Role Table -->
+            <div class="card">
+                <div class="toolbar">
+                    <div class="search-wrap">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" class="search-input" id="userSearch"
+                               placeholder="Search users by email…" oninput="filterTable()">
+                    </div>
+                    <select class="filter-select" id="roleFilter" onchange="filterTable()">
+                        <option value="">All Roles</option>
+                    </select>
+                    <button class="btn btn-secondary btn-sm" onclick="loadUsersWithRoles()">↻ Refresh</button>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table class="user-table">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Roles</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody">
+                            <tr><td colspan="4"><div class="empty-state"><div class="empty-icon">👥</div><div class="empty-title">Loading users…</div></div></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div><!-- /page-content -->
+    </main>
+
+    <!-- ── TOAST CONTAINER ── -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- ━━━ MODALS ━━━ -->
+
+    <!-- Create Role Modal -->
+    <div class="modal-overlay" id="createRoleModal">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title">Create New Role</span>
+                <button class="modal-close" onclick="closeModal('createRoleModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Role Name <span style="color:var(--red);">*</span></label>
+                    <input type="text" class="form-input" id="newRoleName" placeholder="e.g. Finance, Librarian…">
+                    <div class="form-hint">Must be 2–256 characters. Cannot duplicate existing roles.</div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description <span style="color:var(--text-muted);">(optional)</span></label>
+                    <input type="text" class="form-input" id="newRoleDesc" placeholder="What does this role do?">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('createRoleModal')">Cancel</button>
+                <button class="btn btn-primary" id="createRoleBtn" onclick="createRole()">Create Role</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rename Role Modal -->
+    <div class="modal-overlay" id="renameRoleModal">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title">Rename Role</span>
+                <button class="modal-close" onclick="closeModal('renameRoleModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Current Name</label>
+                    <input type="text" class="form-input" id="renameOldName" disabled style="opacity:0.6;">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">New Name <span style="color:var(--red);">*</span></label>
+                    <input type="text" class="form-input" id="renameNewName" placeholder="Enter new role name">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('renameRoleModal')">Cancel</button>
+                <button class="btn btn-primary" id="renameRoleBtn" onclick="renameRole()">Rename</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manage User Roles Modal -->
+    <div class="modal-overlay" id="manageUserModal">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title">Manage Roles — <span id="manageUserEmail" style="color:var(--indigo);"></span></span>
+                <button class="modal-close" onclick="closeModal('manageUserModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">Current roles: <span id="manageCurrentRoles" style="font-weight:600;"></span></p>
+                <div class="form-group">
+                    <label class="form-label">Assign New Role</label>
+                    <select class="form-select" id="manageRoleSelect">
+                        <option value="">— select role —</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Remove Role</label>
+                    <select class="form-select" id="manageRemoveSelect">
+                        <option value="">— select role to remove —</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('manageUserModal')">Close</button>
+                <button class="btn btn-danger btn-sm" onclick="removeRoleForUser()">Remove Role</button>
+                <button class="btn btn-primary" onclick="assignRoleForUser()">Assign Role</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seed Modal -->
+    <div class="modal-overlay" id="seedModal">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title">Seed Default Roles</span>
+                <button class="modal-close" onclick="closeModal('seedModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:14px;color:var(--text-secondary);line-height:1.6;">
+                    This will create the default roles if they don't already exist:
+                </p>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;margin:16px 0;">
+                    <span class="role-tag role-admin">Admin</span>
+                    <span class="role-tag role-registrar">Registrar</span>
+                    <span class="role-tag role-student">Student</span>
+                    <span class="role-tag role-cashier">Cashier</span>
+                    <span class="role-tag role-instructor">Instructor</span>
+                </div>
+                <p style="font-size:12px;color:var(--text-muted);">Existing roles won't be overwritten.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('seedModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="seedRoles()">⚡ Seed Now</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ── CONFIG ──────────────────────────────────────────────────────────────
+        const API = 'http://localhost:5130/api';
+
+        // ── STATE ───────────────────────────────────────────────────────────────
+        let allUsers = [];
+        let allRoles = [];
+        let currentManageUserId = '';
+
+        // ── AUTH ─────────────────────────────────────────────────────────────────
+        function getToken() { return sessionStorage.getItem('jwt') || localStorage.getItem('jwt'); }
+
+        function authHeaders() {
+            const token = getToken();
+            if (!token) { window.location.href = 'LogIn.html'; return {}; }
+            return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+        }
+
+        function logout() {
+            sessionStorage.removeItem('jwt');
+            localStorage.removeItem('jwt');
+            window.location.href = 'LogIn.html';
+        }
+
+        // ── INIT ─────────────────────────────────────────────────────────────────
+        async function init() {
+            const token = getToken();
+            if (!token) { window.location.href = 'LogIn.html'; return; }
+
+            // Populate sidebar with logged-in user info
+            const email = sessionStorage.getItem('email') || localStorage.getItem('email') || 'Admin';
+            document.getElementById('sidebarName').textContent = email;
+            document.getElementById('sidebarAvatar').textContent = email.substring(0, 2).toUpperCase();
+
+            await Promise.all([loadRoles(), loadUsersWithRoles()]);
+        }
+
+        // ── API CALLS ────────────────────────────────────────────────────────────
+
+        async function loadRoles() {
+            try {
+                const res = await fetch(`${API}/role`, { headers: authHeaders() });
+                if (!res.ok) throw new Error(await res.text());
+                const data = await res.json();
+                allRoles = data.roles || [];
+                renderRoles();
+                document.getElementById('statRoles').textContent = allRoles.length;
+                populateRoleDropdowns();
+            } catch (e) {
+                toast('error', 'Failed to load roles: ' + e.message);
+            }
+        }
+
+        async function loadUsersWithRoles() {
+            try {
+                const res = await fetch(`${API}/role/users`, { headers: authHeaders() });
+                if (!res.ok) throw new Error(await res.text());
+                const data = await res.json();
+                allUsers = data.users || [];
+                renderUserTable(allUsers);
+                updateStats();
+                populateUserDropdowns();
+            } catch (e) {
+                toast('error', 'Failed to load users: ' + e.message);
+            }
+        }
+
+        async function createRole() {
+            const name = document.getElementById('newRoleName').value.trim();
+            const desc = document.getElementById('newRoleDesc').value.trim();
+            if (!name) { toast('error', 'Role name is required.'); return; }
+
+            setLoading('createRoleBtn', true);
+            try {
+                const res = await fetch(`${API}/role`, {
+                    method: 'POST',
+                    headers: authHeaders(),
+                    body: JSON.stringify({ name, description: desc })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message || JSON.stringify(data.errors));
+                toast('success', `Role "${name}" created!`);
+                closeModal('createRoleModal');
+                document.getElementById('newRoleName').value = '';
+                document.getElementById('newRoleDesc').value = '';
+                await loadRoles();
+            } catch (e) {
+                toast('error', e.message);
+            }
+            setLoading('createRoleBtn', false);
+        }
+
+        async function deleteRole(roleName) {
+            if (!confirm(`Delete role "${roleName}"? This fails if users are still assigned to it.`)) return;
+            try {
+                const res = await fetch(`${API}/role/${encodeURIComponent(roleName)}`, {
+                    method: 'DELETE', headers: authHeaders()
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message);
+                toast('success', `Role "${roleName}" deleted.`);
+                await loadRoles();
+            } catch (e) {
+                toast('error', e.message);
+            }
+        }
+
+        function openRenameModal(roleName) {
+            document.getElementById('renameOldName').value = roleName;
+            document.getElementById('renameNewName').value = '';
+            openModal('renameRoleModal');
+        }
+
+        async function renameRole() {
+            const oldName = document.getElementById('renameOldName').value;
+            const newName = document.getElementById('renameNewName').value.trim();
+            if (!newName) { toast('error', 'New name is required.'); return; }
+
+            setLoading('renameRoleBtn', true);
+            try {
+                const res = await fetch(`${API}/role/${encodeURIComponent(oldName)}`, {
+                    method: 'PUT',
+                    headers: authHeaders(),
+                    body: JSON.stringify({ newName })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message);
+                toast('success', `Renamed "${oldName}" → "${newName}"`);
+                closeModal('renameRoleModal');
+                await Promise.all([loadRoles(), loadUsersWithRoles()]);
+            } catch (e) {
+                toast('error', e.message);
+            }
+            setLoading('renameRoleBtn', false);
+        }
+
+        async function quickAssign() {
+            const userId = document.getElementById('qaUserId').value;
+            const role   = document.getElementById('qaRole').value;
+            const replace = document.getElementById('qaReplace').checked;
+            if (!userId || !role) { toast('error', 'Select a user and role.'); return; }
+            try {
+                const res = await fetch(`${API}/role/assign`, {
+                    method: 'POST', headers: authHeaders(),
+                    body: JSON.stringify({ userId, role, replaceExistingRoles: replace })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message);
+                toast('success', `Role "${role}" assigned!`);
+                await loadUsersWithRoles();
+            } catch (e) { toast('error', e.message); }
+        }
+
+        async function quickRemove() {
+            const userId = document.getElementById('qaUserId').value;
+            const role   = document.getElementById('qaRole').value;
+            if (!userId || !role) { toast('error', 'Select a user and role.'); return; }
+            try {
+                const res = await fetch(`${API}/role/remove`, {
+                    method: 'POST', headers: authHeaders(),
+                    body: JSON.stringify({ userId, role })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message);
+                toast('success', `Role "${role}" removed!`);
+                await loadUsersWithRoles();
+            } catch (e) { toast('error', e.message); }
+        }
+
+        function openManageUser(userId) {
+            const user = allUsers.find(u => u.id === userId);
+            if (!user) return;
+            currentManageUserId = userId;
+            document.getElementById('manageUserEmail').textContent = user.email;
+            document.getElementById('manageCurrentRoles').textContent = user.roles.join(', ') || 'None';
+
+            // populate assign dropdown (all roles)
+            const sel = document.getElementById('manageRoleSelect');
+            sel.innerHTML = '<option value="">— assign role —</option>';
+            allRoles.forEach(r => {
+                const opt = document.createElement('option');
+                opt.value = r.name; opt.textContent = r.name;
+                sel.appendChild(opt);
+            });
+
+            // populate remove dropdown (only user's current roles)
+            const rem = document.getElementById('manageRemoveSelect');
+            rem.innerHTML = '<option value="">— remove role —</option>';
+            user.roles.forEach(r => {
+                const opt = document.createElement('option');
+                opt.value = r; opt.textContent = r;
+                rem.appendChild(opt);
+            });
+
+            openModal('manageUserModal');
+        }
+
+        async function assignRoleForUser() {
+            const role = document.getElementById('manageRoleSelect').value;
+            if (!role) { toast('error', 'Select a role to assign.'); return; }
+            try {
+                const res = await fetch(`${API}/role/assign`, {
+                    method: 'POST', headers: authHeaders(),
+                    body: JSON.stringify({ userId: currentManageUserId, role, replaceExistingRoles: false })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message);
+                toast('success', `Role "${role}" assigned!`);
+                closeModal('manageUserModal');
+                await loadUsersWithRoles();
+            } catch (e) { toast('error', e.message); }
+        }
+
+        async function removeRoleForUser() {
+            const role = document.getElementById('manageRemoveSelect').value;
+            if (!role) { toast('error', 'Select a role to remove.'); return; }
+            try {
+                const res = await fetch(`${API}/role/remove`, {
+                    method: 'POST', headers: authHeaders(),
+                    body: JSON.stringify({ userId: currentManageUserId, role })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message);
+                toast('success', `Role "${role}" removed!`);
+                closeModal('manageUserModal');
+                await loadUsersWithRoles();
+            } catch (e) { toast('error', e.message); }
+        }
+
+        async function seedRoles() {
+            try {
+                const res = await fetch(`${API}/auth/initialize-roles`, { method: 'POST', headers: authHeaders() });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message);
+                toast('success', `Seeded: ${data.createdRoles.length > 0 ? data.createdRoles.join(', ') : 'No new roles (all exist)'}`);
+                closeModal('seedModal');
+                await loadRoles();
+            } catch (e) { toast('error', e.message); }
+        }
+
+        // ── RENDER ───────────────────────────────────────────────────────────────
+
+        function renderRoles() {
+            const grid = document.getElementById('rolesGrid');
+            if (allRoles.length === 0) {
+                grid.innerHTML = `<div class="empty-state">
+                    <div class="empty-icon">🛡️</div>
+                    <div class="empty-title">No roles yet</div>
+                    <div class="empty-sub">Click "New Role" or seed the defaults</div>
+                </div>`;
+                return;
+            }
+            grid.innerHTML = allRoles.map(r => `
+                <div class="role-chip" title="${r.name}">
+                    🛡️ ${r.name}
+                    <button class="role-chip-del" title="Rename" onclick="openRenameModal('${r.name}')">✏️</button>
+                    <button class="role-chip-del" title="Delete" onclick="deleteRole('${r.name}')">✕</button>
+                </div>
+            `).join('');
+        }
+
+        function renderUserTable(users) {
+            const tbody = document.getElementById('userTableBody');
+            if (users.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state">
+                    <div class="empty-icon">👥</div>
+                    <div class="empty-title">No users found</div>
+                </div></td></tr>`;
+                return;
+            }
+            tbody.innerHTML = users.map(u => {
+                const initials = (u.email || 'U').substring(0, 2).toUpperCase();
+                const roleTags = u.roles.length > 0
+                    ? u.roles.map(r => `<span class="role-tag ${roleClass(r)}">${r}</span>`).join('')
+                    : '<span class="role-tag role-default">No Role</span>';
+                const locked = u.isLockedOut;
+                const statusBadge = locked
+                    ? '<span class="lock-badge lock-locked">🔒 Locked</span>'
+                    : '<span class="lock-badge lock-active">✅ Active</span>';
+                return `
+                <tr>
+                    <td>
+                        <div class="user-cell">
+                            <div class="user-avatar">${initials}</div>
+                            <div>
+                                <div class="user-email">${u.email || '—'}</div>
+                                <div class="user-id">${u.id.substring(0, 8)}…</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>${roleTags}</td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        <button class="btn btn-secondary btn-sm" onclick="openManageUser('${u.id}')">
+                            ⚙️ Manage
+                        </button>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        function roleClass(role) {
+            const map = {
+                admin: 'role-admin', student: 'role-student',
+                registrar: 'role-registrar', cashier: 'role-cashier',
+                instructor: 'role-instructor'
+            };
+            return map[role.toLowerCase()] || 'role-default';
+        }
+
+        function filterTable() {
+            const q = document.getElementById('userSearch').value.toLowerCase();
+            const roleF = document.getElementById('roleFilter').value.toLowerCase();
+            const filtered = allUsers.filter(u => {
+                const matchEmail = !q || (u.email || '').toLowerCase().includes(q);
+                const matchRole  = !roleF || u.roles.some(r => r.toLowerCase() === roleF);
+                return matchEmail && matchRole;
+            });
+            renderUserTable(filtered);
+        }
+
+        function updateStats() {
+            document.getElementById('statUsers').textContent  = allUsers.length;
+            document.getElementById('statActive').textContent = allUsers.filter(u => !u.isLockedOut).length;
+            document.getElementById('statLocked').textContent = allUsers.filter(u => u.isLockedOut).length;
+        }
+
+        function populateRoleDropdowns() {
+            ['qaRole', 'roleFilter'].forEach(id => {
+                const sel = document.getElementById(id);
+                const preserve = sel.value;
+                sel.innerHTML = id === 'roleFilter'
+                    ? '<option value="">All Roles</option>'
+                    : '<option value="">— select role —</option>';
+                allRoles.forEach(r => {
+                    const opt = document.createElement('option');
+                    opt.value = r.name; opt.textContent = r.name;
+                    sel.appendChild(opt);
+                });
+                sel.value = preserve;
+            });
+        }
+
+        function populateUserDropdowns() {
+            const sel = document.getElementById('qaUserId');
+            const preserve = sel.value;
+            sel.innerHTML = '<option value="">— select user —</option>';
+            allUsers.forEach(u => {
+                const opt = document.createElement('option');
+                opt.value = u.id; opt.textContent = u.email;
+                sel.appendChild(opt);
+            });
+            sel.value = preserve;
+        }
+
+        // ── MODAL HELPERS ────────────────────────────────────────────────────────
+        function openModal(id) { document.getElementById(id).classList.add('open'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+        // Close modal on backdrop click
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', e => {
+                if (e.target === overlay) overlay.classList.remove('open');
+            });
+        });
+
+        // ── TOAST HELPER ─────────────────────────────────────────────────────────
+        function toast(type, message) {
+            const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+            const div = document.createElement('div');
+            div.className = `toast ${type}`;
+            div.innerHTML = `<span class="toast-icon">${icons[type]}</span><span>${message}</span>`;
+            document.getElementById('toastContainer').appendChild(div);
+            setTimeout(() => div.remove(), 4000);
+        }
+
+        // ── LOADING HELPER ────────────────────────────────────────────────────────
+        function setLoading(btnId, loading) {
+            const btn = document.getElementById(btnId);
+            btn.disabled = loading;
+            btn.innerHTML = loading ? '<span class="spinner"></span>' : btn.getAttribute('data-label') || btn.textContent;
+        }
+
+        // Store original button labels
+        document.querySelectorAll('[id$="Btn"]').forEach(b => b.setAttribute('data-label', b.textContent));
+
+        // ── BOOT ─────────────────────────────────────────────────────────────────
+        init();
+    </script>
+</body>
+</html>
