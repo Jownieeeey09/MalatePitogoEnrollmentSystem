@@ -164,3 +164,4 @@ C:\Users\Student\OneDrive\Pictures\Documents\EnrollmentSystem\MalatePitogoEnroll
 C:\Users\Student\OneDrive\Pictures\Documents\EnrollmentSystem\MalatePitogoEnrollmentSystem\obj\Debug\net10.0\MalatePitogoEnrollmentSystem.pdb
 C:\Users\Student\OneDrive\Pictures\Documents\EnrollmentSystem\MalatePitogoEnrollmentSystem\obj\Debug\net10.0\MalatePitogoEnrollmentSystem.genruntimeconfig.cache
 C:\Users\Student\OneDrive\Pictures\Documents\EnrollmentSystem\MalatePitogoEnrollmentSystem\obj\Debug\net10.0\ref\MalatePitogoEnrollmentSystem.dll
+C:\Users\Student\OneDrive\Pictures\Documents\EnrollmentSystem\MalatePitogoEnrollmentSystem\obj\Debug\net10.0\MalatePitogoEnrollmentSystem.sourcelink.json
